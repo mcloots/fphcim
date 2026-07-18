@@ -121,13 +121,27 @@ const achievementItems = [
 ].map((x,i)=>({id:`achievement-${slug(x[0])}`,phase:i<5?'start':i<11?'power':'max',category:'achievement',title:x[0],desc:x[1],original:i}));
 
 const libraryItems = [...questItems,...levelItems,...bossItems,...achievementItems];
+const grindSkills = [
+  {skill:'Mining',type:'Gathering',urn:{name:'Strong mining urn',base:2000,rune:'earth rune'},methods:[['Runite ore (estimate)',400,'ores'],['Luminite (estimate)',340,'ores'],['Common gem rocks (estimate)',120,'gems']]},
+  {skill:'Fishing',type:'Gathering',urn:{name:'Plain fishing urn',base:2500,rune:'water rune'},methods:[['Fly fishing, trout/salmon average',60,'feathers'],['Lobster',90,'lobsters'],['Swordfish',100,'swordfish']]},
+  {skill:'Woodcutting',type:'Gathering',urn:{name:'Plain woodcutting urn',base:4125,rune:'earth rune'},methods:[['Willow logs',67.5,'logs'],['Maple logs',100,'logs'],['Yew logs (urn does not apply)',175,'logs']]},
+  {skill:'Smithing',type:'Artisan',methods:[['Rune burial sets (bar-equivalent estimate)',1600,'rune bars'],['Rune equipment +3 (bar-equivalent estimate)',1200,'rune bars'],['Adamant burial sets (bar-equivalent estimate)',600,'adamant bars']]},
+  {skill:'Cooking',type:'Artisan',urn:{name:'Plain cooking urn',base:4750,rune:'fire rune'},methods:[['Swordfish (successful cooks)',140,'swordfish'],['Lobster (successful cooks)',120,'lobsters'],['Salmon (successful cooks)',90,'salmon']]},
+  {skill:'Firemaking',type:'Artisan',methods:[['Willow logs',90,'logs'],['Maple logs',135,'logs'],['Yew logs',202.5,'logs']]},
+  {skill:'Fletching',type:'Artisan',methods:[['Willow shortbows (u)',33.3,'willow logs'],['Maple shortbows (u)',50,'maple logs'],['Yew shortbows (u)',67.5,'yew logs']]},
+  {skill:'Crafting',type:'Artisan',methods:[['Cut diamonds',107.5,'diamonds'],['Cut rubies',85,'rubies'],['Strong mining urns',85.2,'urns']]},
+  {skill:'Runecrafting',type:'Artisan',methods:[['Runespan (estimated XP/hour)',60000,'hours'],['Nature runes (estimated XP/essence)',9,'rune essence']]}
+];
 const state = JSON.parse(localStorage.getItem('ironPathState') || '{}');
 state.done ||= {};
 state.order ||= routeItems.map(x=>x.id);
+state.grinds ||= {};
 let currentView='route', currentCategory='all', currentPhase='all';
 
 const $=s=>document.querySelector(s);
 const save=()=>localStorage.setItem('ironPathState',JSON.stringify(state));
+const xpForLevel=level=>{let points=0;for(let i=1;i<Math.max(1,Math.min(99,level));i++)points+=Math.floor(i+300*Math.pow(2,i/7));return Math.floor(points/4)};
+const fmt=value=>Math.max(0,Math.ceil(value)).toLocaleString('en-GB');
 const wikiUrl=item=>{
   if(item.category==='level') {
     const skill=skills.find(name=>item.title.startsWith(name));
@@ -169,6 +183,8 @@ function updateStats(){
 }
 
 function buildFilters(){
+  $('.side-block:nth-child(2)').hidden=currentView==='grinds';
+  if(currentView==='grinds') return;
   const source=currentView==='route'?routeItems:libraryItems;
   const buttons=[['all','All',source.length],...Object.entries(categories).map(([key,val])=>[key,val.label,source.filter(x=>x.category===key).length])];
   $('#categoryFilters').innerHTML=buttons.map(([key,label,count])=>`<button class="filter-btn ${currentCategory===key?'active':''}" data-category="${key}">${label}<span>${count}</span></button>`).join('');
@@ -198,6 +214,8 @@ function card(x){
 }
 
 function render(){
+  if(currentView==='grinds'){renderGrinds();return;}
+  $('#grindTracker').hidden=true; $('#milestoneList').hidden=false;
   let source=currentView==='route'?[...routeItems].sort((a,b)=>state.order.indexOf(a.id)-state.order.indexOf(b.id)):libraryItems;
   const items=filtered(source), list=$('#milestoneList');
   if(currentView==='route'&&currentPhase==='all'&&currentCategory==='all'&&!$('#searchInput').value&&$('#statusFilter').value==='all'){
@@ -207,6 +225,23 @@ function render(){
   list.querySelectorAll('.check').forEach(c=>c.onchange=e=>{const id=e.target.closest('.milestone').dataset.id;state.done[id]=e.target.checked;save();render();updateStats();});
   list.querySelectorAll('.details-toggle').forEach(button=>button.onclick=e=>{const panel=e.currentTarget.closest('.milestone').querySelector('.milestone-details'),open=panel.hidden;panel.hidden=!open;e.currentTarget.setAttribute('aria-expanded',String(open));e.currentTarget.textContent=open?'⌃':'⌄';e.currentTarget.title=open?'Hide details':'Show details';});
   enableDrag(); updateStats();
+}
+
+function renderGrinds(){
+  const tracker=$('#grindTracker'); tracker.hidden=false; $('#milestoneList').hidden=true; $('#emptyState').hidden=true;
+  tracker.innerHTML=`<div class="grind-summary"><strong>Resource estimates to level 99</strong><p>Enter your current level or exact total XP, choose a method, and record resources already gathered. Estimates exclude bonus XP, failed cooks and method-specific boosts.</p></div>${grindSkills.map((g,i)=>{
+    const s=state.grinds[g.skill]||{},level=s.level||1,xp=s.xp??xpForLevel(level),methodIndex=s.method||0,method=g.methods[methodIndex],remaining=Math.max(0,13034431-xp),urnBlocked=(g.skill==='Woodcutting'&&method[0].startsWith('Yew'))||(g.skill==='Cooking'&&method[0].startsWith('Swordfish')),withUrn=!!s.urn&&g.urn&&!urnBlocked,effective=method[1]*(withUrn?1.2:1),needed=method[2]==='hours'?remaining/method[1]:remaining/effective,have=s.have||0,urns=withUrn?Math.ceil(remaining/(g.urn.base*1.2)):0,urnHave=s.urnHave||0;
+    return `<section class="grind-card" data-skill="${g.skill}"><header><div><span>${g.type}</span><h3>${g.skill} 99</h3></div><strong>${fmt(remaining)} XP left</strong></header><div class="grind-fields"><label>Current level<input class="grind-level" type="number" min="1" max="99" value="${level}"></label><label>Total XP<input class="grind-xp" type="number" min="0" max="13034431" value="${xp}"></label><label>Training method<select class="grind-method">${g.methods.map((m,mi)=>`<option value="${mi}" ${mi===methodIndex?'selected':''}>${m[0]}</option>`).join('')}</select></label></div><div class="resource-result"><div><span>Still required</span><strong>${fmt(Math.max(0,needed-have))} ${method[2]}</strong><small>${fmt(needed)} total at ${method[1].toLocaleString('en-GB')} XP each${withUrn?' + 20% urn XP':''}</small></div><label>Already gathered<input class="grind-have" type="number" min="0" value="${have}"><span>/ ${fmt(needed)}</span></label></div>${g.urn?`<div class="urn-row"><label><input class="grind-urn" type="checkbox" ${withUrn?'checked':''} ${urnBlocked?'disabled':''}> Use ${g.urn.name}s</label><span>${withUrn?`${fmt(Math.max(0,urns-urnHave))} still needed · ${fmt(Math.max(0,urns-urnHave)*2)} soft clay · ${fmt(Math.max(0,urns-urnHave))} ${g.urn.rune}s`:'Urns unavailable for this method'}</span>${withUrn?`<label class="urn-progress">Prepared <input class="grind-urn-have" type="number" min="0" value="${urnHave}"> / ${fmt(urns)}</label>`:''}</div>`:''}<a href="https://runescape.wiki/w/Free-to-play_${g.skill}_training" target="_blank" rel="noreferrer">Open training guide ↗</a></section>`;
+  }).join('')}`;
+  tracker.querySelectorAll('.grind-card').forEach(card=>{
+    const skill=card.dataset.skill,update=(field,value)=>{state.grinds[skill]||={};state.grinds[skill][field]=value;save();renderGrinds();};
+    card.querySelector('.grind-level').onchange=e=>{const level=Math.max(1,Math.min(99,+e.target.value||1));state.grinds[skill]={...(state.grinds[skill]||{}),level,xp:xpForLevel(level)};save();renderGrinds();};
+    card.querySelector('.grind-xp').onchange=e=>update('xp',Math.max(0,Math.min(13034431,+e.target.value||0)));
+    card.querySelector('.grind-method').onchange=e=>update('method',+e.target.value);
+    card.querySelector('.grind-have').onchange=e=>update('have',Math.max(0,+e.target.value||0));
+    const urn=card.querySelector('.grind-urn');if(urn)urn.onchange=e=>update('urn',e.target.checked);
+    const urnHave=card.querySelector('.grind-urn-have');if(urnHave)urnHave.onchange=e=>update('urnHave',Math.max(0,+e.target.value||0));
+  });
 }
 
 function enableDrag(){
@@ -219,7 +254,7 @@ function enableDrag(){
   });
 }
 
-document.querySelectorAll('.view-tab').forEach(b=>b.onclick=()=>{currentView=b.dataset.view;currentCategory='all';currentPhase='all';document.querySelectorAll('.view-tab').forEach(x=>x.classList.toggle('active',x===b));$('#viewKicker').textContent=currentView==='route'?'YOUR ROUTE':'COMPLETE LIBRARY';$('#viewTitle').textContent=currentView==='route'?'Recommended path':'All milestones';$('#viewIntro').textContent=currentView==='route'?'Drag milestones into your preferred order. Changes are saved automatically on this device.':'Every quest, level checkpoint, boss and major achievement goal in one place.';buildFilters();buildPhases();render();});
+document.querySelectorAll('.view-tab').forEach(b=>b.onclick=()=>{currentView=b.dataset.view;currentCategory='all';currentPhase='all';document.querySelectorAll('.view-tab').forEach(x=>x.classList.toggle('active',x===b));const grind=currentView==='grinds';$('#viewKicker').textContent=grind?'RESOURCE PLANNER':currentView==='route'?'YOUR ROUTE':'COMPLETE LIBRARY';$('#viewTitle').textContent=grind?'99 Grind tracker':currentView==='route'?'Recommended path':'All milestones';$('#viewIntro').textContent=grind?'Calculate remaining supplies from your current XP and track what you have already gathered.':currentView==='route'?'Drag milestones into your preferred order. Changes are saved automatically on this device.':'Every quest, level checkpoint, boss and major achievement goal in one place.';$('#contentTools').hidden=grind;buildFilters();buildPhases();render();});
 $('#searchInput').oninput=render; $('#statusFilter').onchange=render;
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='iron-path-progress.json';a.click();URL.revokeObjectURL(a.href);};
 $('#importBtn').onclick=()=>$('#importFile').click();

@@ -49,6 +49,7 @@
           <div class="view-tabs" role="tablist">
             <button class="view-tab active" data-view="route">Recommended path</button>
             <button class="view-tab" data-view="library">All milestones</button>
+            <button class="view-tab" data-view="grinds">99 Grind tracker</button>
           </div>
         </div>
         <div class="side-block">
@@ -65,12 +66,13 @@
       <div class="content">
         <div class="content-head">
           <div><p class="kicker" id="viewKicker">YOUR ROUTE</p><h2 id="viewTitle">Recommended path</h2><p id="viewIntro">Drag milestones into your preferred order. Changes are saved automatically on this device.</p></div>
-          <div class="content-tools">
+          <div class="content-tools" id="contentTools">
             <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search milestones…" autocomplete="off"></label>
             <select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="open">To do</option><option value="done">Completed</option></select>
           </div>
         </div>
         <div id="phaseNav" class="phase-nav" aria-label="Route phases"></div>
+        <div id="grindTracker" class="grind-tracker" hidden></div>
         <div id="milestoneList" class="milestone-list" aria-live="polite"></div>
         <div id="emptyState" class="empty-state" hidden><strong>Nothing found</strong><p>Adjust your search or filters.</p></div>
       </div>
