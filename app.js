@@ -58,6 +58,51 @@ const questWarnings = {
   'Broken Home':'The normal completion is safe when following the guide; challenge runs can wait.',
   'A Shadow over Ashdale':'Review Agoroth’s telegraphed attacks before entering the final encounter.'
 };
+
+const questXp = {
+  "Cook's Assistant":[['Cooking',300]],
+  'The Blood Pact':[['Attack',100],['Strength',100],['Defence',100],['Ranged',100],['Magic',100]],
+  'Let Them Eat Pie':[['Cooking',100],['Thieving',150]],
+  'Rune Mysteries':[['Magic',250],['Runecrafting',250]],
+  'The Restless Ghost':[['Prayer',1125,'includes ancient bones']],
+  'Imp Catcher':[['Magic',875]],
+  'Demon Slayer':[['Combat choice',300]],
+  'Ernest the Chicken':[],
+  'Goblin Diplomacy':[['Crafting',200]],
+  "Gunnar's Ground":[],
+  "The Knight's Sword":[['Smithing',12725]],
+  "Pirate's Treasure":[],
+  'Vampyre Slayer':[['Combat choice',4825]],
+  "Witch's House":[['Constitution',6325]],
+  "Gertrude's Cat":[['Cooking',1525]],
+  'Druidic Ritual':[['Herblore',250]],
+  'Wolf Whistle':[['Summoning',276]],
+  "What's Mine is Yours":[['Mining',1000],['Smithing',400]],
+  'Stolen Hearts':[['Constitution',250],['Combat choice',250]],
+  'Diamond in the Rough':[['Constitution',250],['Combat choice',250],['Mining',20000,'optional · 80 Mining']],
+  'Death Plateau':[['Skill choice',300],['Skill choice',2700,'optional deliveries']],
+  'The Death of Chivalry':[['Magic',250],['Strength',250],['Prayer',250],['Combat choice',500],['Combat choice',3500,'optional · level 40'],['Prayer',60000,'optional · 65 Prayer']],
+  'Perils of Ice Mountain':[['Farming',500],['Hunter',500],['Construction',500],['Thieving',500]],
+  'Myths of the White Lands':[['Skill choice',500],['Crafting',2000,'optional · level 30'],['Woodcutting',20000,'optional · level 80']],
+  'Swept Away':[['Skill choice','10× level','10 goulash portions'],['Magic','variable','optional broom rewards']],
+  'Beneath Cursed Tides':[['Combat choice',10000],['Fishing',5000],['Cooking',5000]],
+  'A Shadow over Ashdale':[['Attack',300],['Strength',300],['Defence',300],['Constitution',300]],
+  'Song from the Depths':[['Constitution',700],['Constitution',5000,'optional · level 50'],['Constitution',25000,'optional · level 80']],
+  "A Soul's Bane":[['Defence',500],['Constitution',500]],
+  'One Piercing Note':[['Prayer',250],['Prayer',50000,'optional Holy Cithara']],
+  'Missing, Presumed Death':[['Prayer',500],['Combat choice',1500],['Constitution',50000,'optional · level 75'],['Skill choice',30000,'optional · level 75']],
+  'Broken Home':[['Skill choice','level-scaled','small XP lamp']],
+  'Gower Quest':[['F2P skill choice',250,'all F2P skills 10+'],['F2P skill choice',1500,'all F2P skills 30+'],['F2P skill choice',12000,'all F2P skills 50+']],
+  'Dragon Slayer':[['Strength',18650],['Defence',18650]],
+  "Chef's Assistant":[['Cooking',1500],['Cooking',8000,'optional post-quest']],
+  'Once Upon a Slime':[['Cooking',2500]],
+  'Heartstealer':[],
+  'Violet is Blue':[['Skill choice',3000,'3 × 1,000 lamps']],
+  'Violet is Blue Too':[['Skill choice',12000,'3 × 4,000 lamps']],
+  'Necromancy!':[['Necromancy',200]],
+  'Rune Memories':[['Magic',300],['Runecrafting',300],['Magic or Prayer',10000,'optional · level 50']],
+  'Duck Quest':[['Herblore',500]]
+};
 const route = [
   ['start','achievement','Activate every F2P lodestone','Unlock Lumbridge, Burthorpe, Taverley, Falador, Port Sarim, Draynor, Varrock, Edgeville, Al Kharid, Ashdale, City of Um, Wendlewick and Wilderness Crater.'],
   ['start','achievement','Set up your daily routine','Complete daily challenges, check Shooting Stars, and buy feather packs from Lumbridge and Port Sarim for future Fishing and Fletching.'],
@@ -204,10 +249,12 @@ function filtered(items){
 
 function card(x){
   const details=detailsFor(x);
+  const rewards=x.category==='quest'?questXp[x.title.replaceAll('’',"'")]:null;
+  const xpBadges=rewards?rewards.length?rewards.map(([skill,xp,note])=>`<span class="xp-badge"><b>${skill}</b><strong>+${typeof xp==='number'?xp.toLocaleString('en-GB'):xp} XP</strong>${note?`<small>${note}</small>`:''}</span>`).join(''):'<span class="xp-badge none">No skill XP</span>':'';
   return `<article class="milestone ${state.done[x.id]?'done':''}" draggable="${currentView==='route'}" data-id="${x.id}">
     <span class="drag" title="Drag to reorder">${currentView==='route'?'⠿':''}</span>
     <input class="check" type="checkbox" ${state.done[x.id]?'checked':''} aria-label="Mark ${x.title} as completed">
-    <div><div class="milestone-title">${x.title}</div><div class="milestone-desc">${x.desc}</div></div>
+    <div><div class="milestone-title">${x.title}</div><div class="milestone-desc">${x.desc}</div>${xpBadges?`<div class="quest-xp" aria-label="Quest experience rewards">${xpBadges}</div>`:''}</div>
     <div class="milestone-meta"><span class="tag ${x.category}">${categories[x.category].tag}</span><button class="details-toggle" type="button" aria-expanded="false" title="Show details">⌄</button></div>
     <div class="milestone-details" hidden><strong>${details.heading}</strong><ul>${details.rows.map(row=>`<li>${row}</li>`).join('')}</ul><a href="${wikiUrl(x)}" target="_blank" rel="noreferrer">Open full RuneScape Wiki guide <span>↗</span></a></div>
   </article>`;
