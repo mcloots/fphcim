@@ -85,6 +85,14 @@
       </div>
     </section>
 
+    <section class="daily-band" aria-labelledby="dailyTitle">
+      <div class="section-inner daily-inner">
+        <div class="daily-heading"><div><p class="kicker">F2P IRONMAN ROUTINE</p><h2 id="dailyTitle">Today’s essentials</h2><p id="dailyDate"></p></div><div class="daily-score"><strong id="dailyCount">0 / 0</strong><span>done today</span></div></div>
+        <div id="dailyList" class="daily-list"></div>
+        <p class="daily-reset">Automatically resets at 00:00 UTC. Optional activities never block journey completion.</p>
+      </div>
+    </section>
+
     <section class="workspace section-inner">
       <aside class="sidebar">
         <div class="side-block">
@@ -111,6 +119,7 @@
           <div><p class="kicker" id="viewKicker">YOUR ROUTE</p><h2 id="viewTitle">Recommended path</h2><p id="viewIntro">Drag milestones into your preferred order. Changes are saved automatically on this device.</p></div>
           <div class="content-tools" id="contentTools">
             <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search milestones…" autocomplete="off"></label>
+            <select id="typeFilter" aria-label="Filter by milestone type"><option value="all">All types</option><option value="quest">Quests</option><option value="level">Levels</option><option value="boss">Bosses</option><option value="achievement">Achievements</option></select>
             <select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="open">To do</option><option value="done">Completed</option></select>
           </div>
         </div>
@@ -123,6 +132,7 @@
   </main>
 
   <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd.</p></footer>
+  <script src="achievement-data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

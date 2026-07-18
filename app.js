@@ -164,7 +164,7 @@ const route = [
   ['max','level','Prayer 99','The longest HCIM resource grind: collect bones passively throughout combat training.'],
   ['max','level','Dungeoneering 99','Run solo floors, prestige correctly, bind a strong primary and secondary style, and claim every useful F2P token reward.'],
   ['max','achievement','17 F2P skills at level 99','The ultimate F2P max milestone.'],
-  ['max','achievement','Maximum HCIM-compatible F2P RuneScore','Complete every F2P achievement that can actually be earned on a Hardcore Ironman.']
+  ['max','achievement','Maximum HCIM-compatible F2P RuneScore','Complete every F2P achievement that can actually be earned on a Hardcore Ironman. The complete F2P list currently contains 742 achievements worth 4,525 RuneScore.']
 ];
 
 const slug = text => text.toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
@@ -175,9 +175,11 @@ const routeItems = [...explicitRouteItems,...routeQuestItems];
 const questItems = questNames.map((title,i)=>({id:`quest-${slug(title)}`, phase:'quests', category:'quest', title, desc:seasonalQuests.has(title)?'Complete this seasonal free-to-play quest while available.':'Complete this permanent free-to-play quest.', original:i}));
 const levelItems = skills.flatMap((skill,si)=>[10,20,30,40,50,60,70,80,90,99].map((level,li)=>({id:`level-${slug(skill)}-${level}`, phase:'max', category:'level', title:`${skill} level ${level}`, desc:level===99?'Earn 13,034,431 XP and reach the skillcape milestone.':`Reach level ${level} in ${skill}.`, original:si*10+li})));
 const bossItems = ['Count Draynor','Delrith','Elvarg','Agoroth','Ivar, King of Bones','Giant Mole','King Black Dragon','Chaos Elemental'].map((title,i)=>({id:`boss-${slug(title)}`,phase:'boss',category:'boss',title,desc:i<4?'Defeat this F2P quest boss without risking your HCIM status.':'Defeat this repeatable F2P boss and record your first kill.',original:i}));
-const achievementItems = [
-  ['Lodestone Network Free Area','Activate all 13 F2P lodestones.'],['Lumbridge Beginner','Complete every available beginner task.'],['Lumbridge Easy','Complete every available easy task.'],['Lumbridge Medium','Complete every available medium task.'],['Lumbridge Hard','Complete every available hard task.'],['Varrock Easy','Complete every F2P-compatible easy task.'],['Varrock Medium','Complete every F2P-compatible medium task.'],['Varrock Hard','Complete every F2P-compatible hard task.'],['Varrock Elite','Complete every F2P-compatible elite task.'],['Daemonheim Easy','Complete the easy Daemonheim tasks.'],['Daemonheim Medium','Complete the medium Daemonheim tasks.'],['Ivar combat achievements','Complete Ivar’s kill-count and mechanics achievements.'],['All permanent F2P quests','Complete all 45 permanent F2P quests.'],['All seasonal F2P quests','Complete all 7 seasonal F2P quests when available.'],['First level 99','Earn your first F2P skillcape.'],['F2P maxed','Reach level 99 in all 17 F2P skills.'],['Maximum HCIM-compatible RuneScore','Complete every F2P achievement that is obtainable on a Hardcore Ironman.']
-].map((x,i)=>({id:`achievement-${slug(x[0])}`,phase:i<5?'start':i<11?'power':'max',category:'achievement',title:x[0],desc:x[1],original:i}));
+const achievementItems = (window.F2P_ACHIEVEMENTS||[]).map((item,i)=>({
+  id:`achievement-${item.id}`,phase:'max',category:'achievement',title:item.name,
+  desc:`${item.description} · ${item.category}${item.subcategory&&item.subcategory!=='N/A'?` / ${item.subcategory}`:''} · ${item.runeScore} RuneScore`,
+  wiki:item.url,runeScore:item.runeScore,achievementCategory:item.category,original:i
+}));
 
 const libraryItems = [...questItems,...levelItems,...bossItems,...achievementItems];
 const grindSkills = [
@@ -191,11 +193,21 @@ const grindSkills = [
   {skill:'Crafting',type:'Artisan',methods:[['Cut diamonds',107.5,'diamonds'],['Cut rubies',85,'rubies'],['Strong mining urns',85.2,'urns']]},
   {skill:'Runecrafting',type:'Artisan',methods:[['Runespan (estimated XP/hour)',60000,'hours'],['Nature runes (estimated XP/essence)',9,'rune essence']]}
 ];
+const dailyTasks = [
+  {id:'challenges',title:'Complete Daily Challenges',detail:'Finish today’s three challenges and claim their XP rewards.',priority:true},
+  {id:'feathers',title:'Buy feather stock',detail:'Check Lumbridge Fishing Supplies and Gerrant’s shop in Port Sarim for feathers and packs.',priority:true},
+  {id:'runes',title:'Restock useful runes',detail:'Buy the elemental, mind, body, nature and law runes your current Magic plan needs.',priority:true},
+  {id:'star',title:'Check Shooting Stars',detail:'Mine a convenient F2P star for Mining XP, coins and useful rune rewards.'},
+  {id:'evil-tree',title:'Check Evil Tree',detail:'Join a suitable F2P Evil Tree when available for Woodcutting and Firemaking rewards.'},
+  {id:'event',title:'Check active event or minigame',detail:'Use worthwhile Ironman-compatible daily caps; skip unsafe or members-only activities.'}
+];
 const state = JSON.parse(localStorage.getItem('ironPathState') || '{}');
 state.done ||= {};
 state.order ||= routeItems.map(x=>x.id);
 state.order = [...state.order.filter(id=>routeItems.some(item=>item.id===id)),...routeItems.map(item=>item.id).filter(id=>!state.order.includes(id))];
 state.grinds ||= {};
+const dailyKey=new Date().toISOString().slice(0,10);
+if(state.daily?.date!==dailyKey) state.daily={date:dailyKey,done:{}};
 let currentView='route', currentCategory='all', currentPhase='all';
 
 const $=s=>document.querySelector(s);
@@ -203,6 +215,7 @@ const save=()=>localStorage.setItem('ironPathState',JSON.stringify(state));
 const xpForLevel=level=>{let points=0;for(let i=1;i<Math.max(1,Math.min(99,level));i++)points+=Math.floor(i+300*Math.pow(2,i/7));return Math.floor(points/4)};
 const fmt=value=>Math.max(0,Math.ceil(value)).toLocaleString('en-GB');
 const wikiUrl=item=>{
+  if(item.wiki) return item.wiki;
   if(item.category==='level') {
     const skill=skills.find(name=>item.title.startsWith(name));
     if(!skill) return 'https://runescape.wiki/w/Skill_training_guides';
@@ -242,13 +255,22 @@ function updateStats(){
   $('#nextLabel').textContent=next?.title||'F2P completion!';
 }
 
+function renderDaily(){
+  const done=dailyTasks.filter(task=>state.daily.done[task.id]).length;
+  $('#dailyDate').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'}).format(new Date());
+  $('#dailyCount').textContent=`${done} / ${dailyTasks.length}`;
+  $('#dailyList').innerHTML=dailyTasks.map(task=>`<label class="daily-task ${state.daily.done[task.id]?'done':''}"><input type="checkbox" data-daily="${task.id}" ${state.daily.done[task.id]?'checked':''}><span class="daily-check">✓</span><span><strong>${task.title}${task.priority?'<b>Important</b>':''}</strong><small>${task.detail}</small></span></label>`).join('');
+  document.querySelectorAll('[data-daily]').forEach(input=>input.onchange=e=>{state.daily.done[e.target.dataset.daily]=e.target.checked;save();renderDaily();});
+}
+
 function buildFilters(){
   $('.side-block:nth-child(2)').hidden=currentView==='grinds';
   if(currentView==='grinds') return;
+  $('#typeFilter').value=currentCategory;
   const source=currentView==='route'?routeItems:libraryItems;
   const buttons=[['all','All',source.length],...Object.entries(categories).map(([key,val])=>[key,val.label,source.filter(x=>x.category===key).length])];
   $('#categoryFilters').innerHTML=buttons.map(([key,label,count])=>`<button class="filter-btn ${currentCategory===key?'active':''}" data-category="${key}">${label}<span>${count}</span></button>`).join('');
-  document.querySelectorAll('.filter-btn').forEach(b=>b.onclick=()=>{currentCategory=b.dataset.category;buildFilters();render();});
+  document.querySelectorAll('.filter-btn').forEach(b=>b.onclick=()=>{currentCategory=b.dataset.category;$('#typeFilter').value=currentCategory;buildFilters();render();});
 }
 
 function buildPhases(){
@@ -318,8 +340,9 @@ function enableDrag(){
 
 document.querySelectorAll('.view-tab').forEach(b=>b.onclick=()=>{currentView=b.dataset.view;currentCategory='all';currentPhase='all';document.querySelectorAll('.view-tab').forEach(x=>x.classList.toggle('active',x===b));const grind=currentView==='grinds';$('#viewKicker').textContent=grind?'RESOURCE PLANNER':currentView==='route'?'YOUR ROUTE':'COMPLETE LIBRARY';$('#viewTitle').textContent=grind?'99 Grind tracker':currentView==='route'?'Recommended path':'All milestones';$('#viewIntro').textContent=grind?'Calculate remaining supplies from your current XP and track what you have already gathered.':currentView==='route'?'Drag milestones into your preferred order. Changes are saved automatically on this device.':'Every quest, level checkpoint, boss and major achievement goal in one place.';$('#contentTools').hidden=grind;buildFilters();buildPhases();render();});
 $('#searchInput').oninput=render; $('#statusFilter').onchange=render;
+$('#typeFilter').onchange=e=>{currentCategory=e.target.value;buildFilters();render();};
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='iron-path-progress.json';a.click();URL.revokeObjectURL(a.href);};
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{Object.assign(state,JSON.parse(reader.result));save();render();}catch{alert('This file does not contain valid Iron Path progress.')}};reader.readAsText(file);};
 $('#resetBtn').onclick=()=>{if(confirm('Clear all completed milestones and your custom order?')){localStorage.removeItem('ironPathState');location.reload();}};
-buildFilters(); buildPhases(); render();
+buildFilters(); buildPhases(); render(); renderDaily();
