@@ -19,3 +19,8 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rs3-f2p-hcim.netlify.app/sitemap.xml
+
