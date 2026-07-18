@@ -15,8 +15,9 @@ const phases = [
 ];
 
 const questNames = [
-  'Cook’s Assistant','The Blood Pact','Let Them Eat Pie','Rune Mysteries','The Restless Ghost','Imp Catcher','Demon Slayer','Ernest the Chicken','Goblin Diplomacy','Gunnar’s Ground','The Knight’s Sword','Pirate’s Treasure','Vampyre Slayer','Witch’s House','Gertrude’s Cat','Druidic Ritual','Wolf Whistle','What’s Mine is Yours','Stolen Hearts','Diamond in the Rough','Death Plateau','The Death of Chivalry','Perils of Ice Mountain','Myths of the White Lands','Swept Away','Beneath Cursed Tides','A Shadow over Ashdale','Song from the Depths','A Soul’s Bane','One Piercing Note','Missing, Presumed Death','Broken Home','Gower Quest','Dragon Slayer','Chef’s Assistant','Once Upon a Slime','Heartstealer','Violet is Blue','Violet is Blue Too','Necromancy!','Rune Memories','Duck Quest'
+  'Cook’s Assistant','The Blood Pact','Let Them Eat Pie','Rune Mysteries','The Restless Ghost','Imp Catcher','Demon Slayer','Ernest the Chicken','Goblin Diplomacy','Gunnar’s Ground','The Knight’s Sword','Pirate’s Treasure','Vampyre Slayer','Witch’s House','Gertrude’s Cat','Druidic Ritual','Wolf Whistle','What’s Mine is Yours','Stolen Hearts','Death Plateau','The Death of Chivalry','Perils of Ice Mountain','Myths of the White Lands','Swept Away','Beneath Cursed Tides','A Shadow over Ashdale','Song from the Depths','A Soul’s Bane','One Piercing Note','Missing, Presumed Death','Broken Home','Gower Quest','Dragon Slayer','Chef’s Assistant','Once Upon a Slime','Heartstealer','Hearts of Sanguine','Priest in Peril','Shield of Arrav','There’s No Place Like Home...','Visions of Havenhythe','Violet is Blue','Violet is Blue Too','Necromancy!','Duck Quest','A Christmas Reunion','Cold Front','Corporate Egg-spionage','Field of Screams','Great Egg-spectations','Guys and Dolls','It’s Snow Bother'
 ];
+const seasonalQuests = new Set(['A Christmas Reunion','Cold Front','Corporate Egg-spionage','Field of Screams','Great Egg-spectations','Guys and Dolls','It’s Snow Bother']);
 
 const skills = ['Attack','Strength','Defence','Constitution','Ranged','Prayer','Magic','Runecrafting','Dungeoneering','Mining','Smithing','Fishing','Cooking','Firemaking','Woodcutting','Crafting','Fletching'];
 const skillMethods = {
@@ -79,7 +80,6 @@ const questXp = {
   'Wolf Whistle':[['Summoning',276]],
   "What's Mine is Yours":[['Mining',1000],['Smithing',400]],
   'Stolen Hearts':[['Constitution',250],['Combat choice',250]],
-  'Diamond in the Rough':[['Constitution',250],['Combat choice',250],['Mining',20000,'optional · 80 Mining']],
   'Death Plateau':[['Skill choice',300],['Skill choice',2700,'optional deliveries']],
   'The Death of Chivalry':[['Magic',250],['Strength',250],['Prayer',250],['Combat choice',500],['Combat choice',3500,'optional · level 40'],['Prayer',60000,'optional · 65 Prayer']],
   'Perils of Ice Mountain':[['Farming',500],['Hunter',500],['Construction',500],['Thieving',500]],
@@ -97,11 +97,22 @@ const questXp = {
   "Chef's Assistant":[['Cooking',1500],['Cooking',8000,'optional post-quest']],
   'Once Upon a Slime':[['Cooking',2500]],
   'Heartstealer':[],
+  'Hearts of Sanguine':[['Herblore',250],['Smithing',250]],
+  'Priest in Peril':[['Prayer',1406]],
+  'Shield of Arrav':[],
+  "There's No Place Like Home...":[['Construction',250]],
+  'Visions of Havenhythe':[],
   'Violet is Blue':[['Skill choice',3000,'3 × 1,000 lamps']],
   'Violet is Blue Too':[['Skill choice',12000,'3 × 4,000 lamps']],
   'Necromancy!':[['Necromancy',200]],
-  'Rune Memories':[['Magic',300],['Runecrafting',300],['Magic or Prayer',10000,'optional · level 50']],
-  'Duck Quest':[['Herblore',500]]
+  'Duck Quest':[['Herblore',500]],
+  'A Christmas Reunion':[['Skill choice',5000]],
+  'Cold Front':[['Skill choice',4500,'3 × 1,500 lamps']],
+  'Corporate Egg-spionage':[['Thieving',5000]],
+  'Field of Screams':[],
+  'Great Egg-spectations':[['Cooking',5000]],
+  'Guys and Dolls':[],
+  "It's Snow Bother":[['Skill choice',15000,'3 × 5,000 lamps']]
 };
 const route = [
   ['start','achievement','Activate every F2P lodestone','Unlock Lumbridge, Burthorpe, Taverley, Falador, Port Sarim, Draynor, Varrock, Edgeville, Al Kharid, Ashdale, City of Um, Wendlewick and Wilderness Crater.'],
@@ -129,7 +140,7 @@ const route = [
   ['quests','quest','Song from the Depths','Claim its F2P quest rewards and continue the complete quest route; no members-only bossing is required.'],
   ['quests','quest','Broken Home','Complete a relaxed first run before pursuing the challenge rewards later.'],
   ['quests','quest','Dragon Slayer','HCIM checkpoint: rune equipment, an anti-dragon shield, good food and a teleport.'],
-  ['quests','achievement','All 42 permanent F2P quests','Finish the remaining safe quests and end with the hardest combat quests.'],
+  ['quests','achievement','All 45 permanent F2P quests','Finish every permanent F2P quest and end with the hardest combat quests.'],
   ['power','level','All combat stats 60+','A sensible safety baseline for Giant Mole, KBD and quest replays.'],
   ['power','level','Prayer 43','Protection prayers are a core layer of HCIM safety.'],
   ['power','achievement','Lumbridge achievements: Beginner → Hard','Work through each tier and claim Explorer’s ring rewards as they become available.'],
@@ -157,12 +168,15 @@ const route = [
 ];
 
 const slug = text => text.toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-const routeItems = route.map((x,i)=>({id:`route-${slug(x[2])}`, phase:x[0], category:x[1], title:x[2], desc:x[3], route:true, original:i}));
-const questItems = questNames.map((title,i)=>({id:`quest-${slug(title)}`, phase:'quests', category:'quest', title, desc:'Complete this permanent free-to-play quest.', original:i}));
+const explicitRouteItems = route.map((x,i)=>({id:`route-${slug(x[2])}`, phase:x[0], category:x[1], title:x[2], desc:x[3], route:true, original:i}));
+const routeQuestTitles = new Set(explicitRouteItems.filter(x=>x.category==='quest').map(x=>slug(x.title)));
+const routeQuestItems = questNames.filter(title=>!routeQuestTitles.has(slug(title))).map((title,i)=>({id:`route-quest-${slug(title)}`,phase:'quests',category:'quest',title,desc:seasonalQuests.has(title)?'Complete this seasonal F2P quest while the event is available.':'Complete this permanent F2P quest as part of the full quest route.',route:true,original:route.length+i}));
+const routeItems = [...explicitRouteItems,...routeQuestItems];
+const questItems = questNames.map((title,i)=>({id:`quest-${slug(title)}`, phase:'quests', category:'quest', title, desc:seasonalQuests.has(title)?'Complete this seasonal free-to-play quest while available.':'Complete this permanent free-to-play quest.', original:i}));
 const levelItems = skills.flatMap((skill,si)=>[10,20,30,40,50,60,70,80,90,99].map((level,li)=>({id:`level-${slug(skill)}-${level}`, phase:'max', category:'level', title:`${skill} level ${level}`, desc:level===99?'Earn 13,034,431 XP and reach the skillcape milestone.':`Reach level ${level} in ${skill}.`, original:si*10+li})));
 const bossItems = ['Count Draynor','Delrith','Elvarg','Agoroth','Ivar, King of Bones','Giant Mole','King Black Dragon','Chaos Elemental'].map((title,i)=>({id:`boss-${slug(title)}`,phase:'boss',category:'boss',title,desc:i<4?'Defeat this F2P quest boss without risking your HCIM status.':'Defeat this repeatable F2P boss and record your first kill.',original:i}));
 const achievementItems = [
-  ['Lodestone Network Free Area','Activate all 13 F2P lodestones.'],['Lumbridge Beginner','Complete every available beginner task.'],['Lumbridge Easy','Complete every available easy task.'],['Lumbridge Medium','Complete every available medium task.'],['Lumbridge Hard','Complete every available hard task.'],['Varrock Easy','Complete every F2P-compatible easy task.'],['Varrock Medium','Complete every F2P-compatible medium task.'],['Varrock Hard','Complete every F2P-compatible hard task.'],['Varrock Elite','Complete every F2P-compatible elite task.'],['Daemonheim Easy','Complete the easy Daemonheim tasks.'],['Daemonheim Medium','Complete the medium Daemonheim tasks.'],['Ivar combat achievements','Complete Ivar’s kill-count and mechanics achievements.'],['All F2P quests','Complete all 42 permanent F2P quests.'],['First level 99','Earn your first F2P skillcape.'],['F2P maxed','Reach level 99 in all 17 F2P skills.'],['Maximum HCIM-compatible RuneScore','Complete every F2P achievement that is obtainable on a Hardcore Ironman.']
+  ['Lodestone Network Free Area','Activate all 13 F2P lodestones.'],['Lumbridge Beginner','Complete every available beginner task.'],['Lumbridge Easy','Complete every available easy task.'],['Lumbridge Medium','Complete every available medium task.'],['Lumbridge Hard','Complete every available hard task.'],['Varrock Easy','Complete every F2P-compatible easy task.'],['Varrock Medium','Complete every F2P-compatible medium task.'],['Varrock Hard','Complete every F2P-compatible hard task.'],['Varrock Elite','Complete every F2P-compatible elite task.'],['Daemonheim Easy','Complete the easy Daemonheim tasks.'],['Daemonheim Medium','Complete the medium Daemonheim tasks.'],['Ivar combat achievements','Complete Ivar’s kill-count and mechanics achievements.'],['All permanent F2P quests','Complete all 45 permanent F2P quests.'],['All seasonal F2P quests','Complete all 7 seasonal F2P quests when available.'],['First level 99','Earn your first F2P skillcape.'],['F2P maxed','Reach level 99 in all 17 F2P skills.'],['Maximum HCIM-compatible RuneScore','Complete every F2P achievement that is obtainable on a Hardcore Ironman.']
 ].map((x,i)=>({id:`achievement-${slug(x[0])}`,phase:i<5?'start':i<11?'power':'max',category:'achievement',title:x[0],desc:x[1],original:i}));
 
 const libraryItems = [...questItems,...levelItems,...bossItems,...achievementItems];
@@ -180,6 +194,7 @@ const grindSkills = [
 const state = JSON.parse(localStorage.getItem('ironPathState') || '{}');
 state.done ||= {};
 state.order ||= routeItems.map(x=>x.id);
+state.order = [...state.order.filter(id=>routeItems.some(item=>item.id===id)),...routeItems.map(item=>item.id).filter(id=>!state.order.includes(id))];
 state.grinds ||= {};
 let currentView='route', currentCategory='all', currentPhase='all';
 
