@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive RuneScape 3 F2P Hardcore Ironman path to every quest and level 99.">
+  <title>Iron Path — F2P HCIM planner</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-shade"></div>
+    <nav class="topbar" aria-label="Main navigation">
+      <a class="brand" href="#top"><span class="brand-mark">IP</span><span>IRON PATH</span></a>
+      <div class="nav-actions">
+        <button class="icon-btn" id="exportBtn" title="Export progress" aria-label="Export progress">⇩</button>
+        <button class="icon-btn" id="importBtn" title="Import progress" aria-label="Import progress">⇧</button>
+        <button class="icon-btn danger" id="resetBtn" title="Reset progress" aria-label="Reset progress">↺</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </nav>
+    <div class="hero-content" id="top">
+      <p class="eyebrow">RUNESCAPE 3 · FREE TO PLAY · HARDCORE IRONMAN</p>
+      <h1>Your path to<br><span>F2P completion</span></h1>
+      <p class="hero-copy">From Tutorial Island to seventeen level 99s. A safe, logical route that brings quests, equipment and grinds together at the right time.</p>
+      <a class="primary-btn" href="#planner">Start your journey <span>↓</span></a>
+    </div>
+    <div class="hero-stats" aria-label="Progress overview">
+      <div><strong id="doneCount">0</strong><span>completed</span></div>
+      <div><strong id="totalCount">0</strong><span>milestones</span></div>
+      <div><strong id="percentCount">0%</strong><span>complete</span></div>
+      <div class="xp-stat"><strong id="nextLabel">First steps</strong><span>next milestone</span></div>
+    </div>
+  </header>
+
+  <main id="planner">
+    <section class="progress-band" aria-label="Total progress">
+      <div class="section-inner progress-inner">
+        <div><p class="kicker">TOTAL PROGRESS</p><h2>The long road, made visible.</h2></div>
+        <div class="progress-wrap"><div class="progress-track"><span id="progressFill"></span></div><span id="progressText">0 / 0</span></div>
+      </div>
+    </section>
+
+    <section class="workspace section-inner">
+      <aside class="sidebar">
+        <div class="side-block">
+          <p class="side-label">VIEW</p>
+          <div class="view-tabs" role="tablist">
+            <button class="view-tab active" data-view="route">Recommended path</button>
+            <button class="view-tab" data-view="library">All milestones</button>
+          </div>
+        </div>
+        <div class="side-block">
+          <p class="side-label">CATEGORY</p>
+          <div id="categoryFilters" class="filter-list"></div>
+        </div>
+        <div class="side-block note">
+          <span class="shield">◆</span>
+          <div><strong>Hardcore rule</strong><p>Safety comes before XP per hour. Avoid Wilderness risks and practise bosses first whenever possible.</p></div>
+        </div>
+        <div class="source-note">Based on current F2P information from <a href="https://runescape.wiki/" target="_blank" rel="noreferrer">The RuneScape Wiki ↗</a>. Journey tips adapted from Maghda’s RS3 F2P Ironman Guide v1.1.</div>
+      </aside>
+
+      <div class="content">
+        <div class="content-head">
+          <div><p class="kicker" id="viewKicker">YOUR ROUTE</p><h2 id="viewTitle">Recommended path</h2><p id="viewIntro">Drag milestones into your preferred order. Changes are saved automatically on this device.</p></div>
+          <div class="content-tools">
+            <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search milestones…" autocomplete="off"></label>
+            <select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="open">To do</option><option value="done">Completed</option></select>
+          </div>
+        </div>
+        <div id="phaseNav" class="phase-nav" aria-label="Route phases"></div>
+        <div id="milestoneList" class="milestone-list" aria-live="polite"></div>
+        <div id="emptyState" class="empty-state" hidden><strong>Nothing found</strong><p>Adjust your search or filters.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd.</p></footer>
+  <script src="app.js"></script>
+</body>
+</html>
