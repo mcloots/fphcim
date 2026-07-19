@@ -1,0 +1,9 @@
+.seo-guide{background:#fff;border-top:1px solid var(--line)}
+.seo-guide-inner{padding-top:48px;padding-bottom:52px}
+.seo-guide h2{max-width:720px;margin:0;font:700 30px/1.2 Georgia,serif}
+.seo-guide-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:26px;border-top:1px solid var(--line)}
+.seo-guide-columns article{padding:22px 28px 0 0}
+.seo-guide-columns article+article{padding-left:28px;border-left:1px solid var(--line)}
+.seo-guide-columns h3{margin:0 0 8px;font:700 17px Georgia,serif}
+.seo-guide-columns p{margin:0;color:var(--muted);font-size:11px;line-height:1.65}
+@media(max-width:760px){.seo-guide-columns{grid-template-columns:1fr}.seo-guide-columns article,.seo-guide-columns article+article{padding:18px 0;border-left:0;border-bottom:1px solid var(--line)}.seo-guide-columns article:last-child{border-bottom:0}}
