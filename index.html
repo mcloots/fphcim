@@ -29,6 +29,8 @@
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="grind-locations.css">
+  <link rel="stylesheet" href="tips.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -101,6 +103,7 @@
             <button class="view-tab active" data-view="route">Recommended path</button>
             <button class="view-tab" data-view="library">All milestones</button>
             <button class="view-tab" data-view="grinds">99 Grind tracker</button>
+            <button class="view-tab" data-view="tips">Community tips</button>
           </div>
         </div>
         <div class="side-block">
@@ -125,6 +128,21 @@
         </div>
         <div id="phaseNav" class="phase-nav" aria-label="Route phases"></div>
         <div id="grindTracker" class="grind-tracker" hidden></div>
+        <div id="tipsPage" class="tips-page" hidden>
+          <section class="tip-submit">
+            <div><span>Share your knowledge</span><h3>Submit an F2P Ironman tip</h3><p>Your email address is not requested or stored. Submissions are filtered by Netlify and reviewed before publication.</p></div>
+            <form id="tipForm" name="community-tip" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+              <input type="hidden" name="form-name" value="community-tip">
+              <p class="bot-field" aria-hidden="true"><label>Do not fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+              <label>Title<input name="title" type="text" maxlength="100" required></label>
+              <label>Prerequisites<textarea name="prerequisites" rows="3" maxlength="500" placeholder="Levels, quests or items" required></textarea></label>
+              <label>Description<textarea name="description" rows="5" maxlength="1500" required></textarea></label>
+              <button type="submit">Submit tip <b>→</b></button>
+              <p class="tip-form-status" id="tipFormStatus" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+          <div id="tipList" class="tip-list"></div>
+        </div>
         <div id="milestoneList" class="milestone-list" aria-live="polite"></div>
         <div id="emptyState" class="empty-state" hidden><strong>Nothing found</strong><p>Adjust your search or filters.</p></div>
       </div>
@@ -134,5 +152,6 @@
   <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd.</p></footer>
   <script src="achievement-data.js"></script>
   <script src="app.js"></script>
+  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="micclo" data-description="Support me on Buy me a coffee!" data-message="If you like my RS3 F2P HCIM guide: feel free to support me!" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 </body>
 </html>

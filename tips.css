@@ -1,0 +1,23 @@
+.tips-page{display:flex;flex-direction:column;gap:18px}
+.tip-submit{display:grid;grid-template-columns:minmax(0,.8fr) minmax(320px,1fr);align-items:start;gap:36px;padding:22px 24px;background:var(--green);color:#fff;border-left:4px solid var(--gold)}
+.tip-submit>div:first-child{max-width:520px}
+.tip-submit span,.tip-card>span{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#f0c64e}
+.tip-submit h3{margin:5px 0 7px;font:700 23px Georgia,serif}
+.tip-submit p{margin:0;color:#dbe4dc;font-size:11px;line-height:1.55}
+.tip-submit form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tip-submit form label{display:flex;flex-direction:column;gap:5px;font-size:9px;font-weight:800;text-transform:uppercase;color:#dbe4dc}
+.tip-submit form label:nth-of-type(2),.tip-submit form label:nth-of-type(3){grid-column:1/-1}
+.tip-submit input,.tip-submit textarea{width:100%;border:1px solid #617366;background:#fff;padding:9px;color:var(--ink);font:inherit;resize:vertical}
+.tip-submit input{height:38px}
+.tip-submit button{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;min-height:40px;border:0;background:var(--gold);padding:10px 13px;color:var(--ink);font-size:11px;font-weight:800;cursor:pointer}
+.tip-submit button:hover{background:#efc54b}.tip-submit button:disabled{cursor:wait;opacity:.65}
+.bot-field{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.tip-form-status{align-self:center;margin:0!important;color:#dbe4dc;font-size:10px!important;line-height:1.4}
+.tip-list{display:flex;flex-direction:column;gap:8px}
+.tip-card{padding:18px 20px;background:#fff;border:1px solid var(--line)}
+.tip-card h3{margin:4px 0 10px;font:700 19px Georgia,serif}
+.tip-card p{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+.tip-prerequisites{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.tip-prerequisites strong{margin-right:3px;color:var(--muted);font-size:9px;text-transform:uppercase}
+.tip-prerequisites b{padding:5px 7px;background:#f1e6c6;color:#765a0d;font-size:9px}
+@media(max-width:760px){.tip-submit{grid-template-columns:1fr}.tip-submit form{grid-template-columns:1fr}.tip-submit form label:nth-of-type(2),.tip-submit form label:nth-of-type(3){grid-column:1}.tip-card{padding:15px 12px}}
