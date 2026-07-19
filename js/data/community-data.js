@@ -1,5 +1,41 @@
 ﻿const communityTips = [
   {
+    title: "Buy both Hardcore extra lives as soon as you qualify",
+    prerequisites: ["1,000 total level and 100,000 coins for the first life", "1,600 total level and 10,000,000 coins for the second life", "Speak to Mr Ex in Edgeville before dying"],
+    description:
+      "Mr Ex sells two divine coins, and each adds one extra Hardcore death. Purchase them before you need them; they protect a future death and cannot restore HCIM status afterwards. Check remaining lives through Items Kept on Death → Death Information. Losing the final life converts the account to a normal Ironman.",
+  },
+  {
+    title: "Build a real F2P emergency teleport setup",
+    prerequisites: ["25 Magic for Varrock Teleport or a higher F2P teleport", "Required law and elemental runes", "War’s Retreat Teleport after 10 boss kills"],
+    description:
+      "Put a rune-funded Magic teleport and War’s Retreat Teleport on easy keybinds and test both before risky combat. Leave with a safe HP margin: lodestone teleports are interrupted by combat, while teleport blocks, stuns, restricted encounters and deep Wilderness can stop other escapes. Ring of life is members-only and is not a safeguard for a strict F2P account.",
+  },
+  {
+    title: "Make early coins through General Stores",
+    prerequisites: ["20 Mining and Crafting for uncommon gem rocks", "Or combat levels for Corpse spiders", "A convenient General Store"],
+    description:
+      "Mine and cut sapphires, emeralds and rubies at the Al Kharid uncommon gem rocks, then sell only surplus gems not needed for jewellery. Alternatively, kill Corpse spiders, craft their silk into spider-silk robe bottoms and sell those. Store offers fall as stock rises, so check the displayed price and sell in sensible batches.",
+  },
+  {
+    title: "High Alch valuable duplicate equipment",
+    prerequisites: ["55 Magic", "Nature runes", "44 Runecrafting recommended for self-supply"],
+    description:
+      "Use High Level Alchemy on items whose return justifies a scarce nature rune: duplicate rune equipment, blue dragonhide bodies or shields, and valuable equipment drops are strong targets. Keep your best gear and future upgrade materials. Alching during travel or other low-input activities also adds Magic XP.",
+  },
+  {
+    title: "Sell rune arrows for repeatable late-game cash",
+    prerequisites: ["75 Fletching", "Rune arrowheads from Smithing", "A sustained feather supply"],
+    description:
+      "Fletch rune arrows from your ores and feather stock, then sell surplus arrows to a General Store for 153 coins each. This connects Mining, Smithing and Fletching without consuming nature runes. Keep a combat ammunition reserve before selling the rest.",
+  },
+  {
+    title: "Choose General Store or High Alchemy deliberately",
+    prerequisites: ["Check the shop offer", "Check the High Alchemy value", "Know your nature-rune needs"],
+    description:
+      "Use General Stores for low-value bulk products and early cash when nature runes are more useful elsewhere. High Alch compact, valuable equipment once the extra return is worth the rune. Examining a tradeable item on an Ironman shows its High Alchemy value, making the comparison quick; reserve supplies needed for equipment, urns, ammunition and level 99 grinds first.",
+  },
+  {
     title: "Unlock Cremation from ghosts early",
     prerequisites: ["Tier 30-40 Magic recommended", "Earth spells", "A tinderbox and logs"],
     description:
