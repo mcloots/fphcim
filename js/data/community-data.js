@@ -1,0 +1,119 @@
+﻿const communityTips = [
+  {
+    title: "Unlock Cremation from ghosts early",
+    prerequisites: ["Tier 30-40 Magic recommended", "Earth spells", "A tinderbox and logs"],
+    description:
+      "Farm Ankous on the fourth level of the Stronghold of Security: they are weak to Earth spells and have better supporting drops than ordinary ghosts. Once Cremation drops, use valuable bones on lit logs; dragon bones give 180 Prayer XP and 144 Firemaking XP each.",
+  },
+  {
+    title: "Add Wendlewick to your feather run",
+    prerequisites: ["Wendlewick lodestone", "Enough coins for feather stock"],
+    description:
+      "Visit the Fishing Shop in southern Wendlewick alongside Lumbridge Fishing Supplies and Gerrant’s shop in Port Sarim. The fisherwoman by the dock and the market assistant both open the same Wendlewick shop stock.",
+  },
+  {
+    title: "Use Ivar as an early mechanics check",
+    prerequisites: [
+      "50+ in one combat style",
+      "50+ Defence",
+      "43 Prayer recommended",
+      "Reliable tier 50 equipment",
+    ],
+    description:
+      "Ivar, King of Bones is a useful first repeatable mechanics boss. Learn his three combat tells and use the matching protection prayer. Every kill guarantees a colossal bone worth 400 Prayer XP; bury it manually because it does not work with the bonecrusher or bone-offering sites.",
+  },
+  {
+    title: "Offer every Daemonheim bone at an altar",
+    prerequisites: ["Dungeoneering floors", "An altar found during the floor"],
+    description:
+      "Do not bury bones immediately inside Daemonheim. Save them until you find an altar: ordinary Dungeoneering bones give 15.7 Prayer XP at an altar instead of 4.5 XP when buried. This turns regular floor clearing into meaningful passive Prayer training.",
+  },
+  {
+    title: "Unlock the War’s Retreat teleport early",
+    prerequisites: ["10 total boss kills"],
+    description:
+      "Ten boss kills unlock the direct War’s Retreat teleport, one of the best F2P bank teleports. Build the first kills on a boss you can defeat safely, then use the teleport to shorten gathering, shop and bossing routes.",
+  },
+  {
+    title: "Take every uncapped Shooting Star reward",
+    prerequisites: ["Mining level for the star layer", "A pickaxe"],
+    description:
+      "Shooting Star rewards currently include 35,000 coins, cosmic and astral runes, and gold stone spirits. The reward limit was removed on 16 March 2026, so convenient additional stars can fund shop runs and improve later ore gathering instead of being only a once-daily activity.",
+  },
+  {
+    title: "Use the Shooting Star double-ore window",
+    prerequisites: ["Complete a Shooting Star", "Ore or gem route prepared"],
+    description:
+      "A completed star grants a 15-minute Mining buff with a 25% chance to receive double ore. Move directly to luminite, runite or gem rocks after claiming the reward; the timer pauses while logged out, so prepare the destination first.",
+  },
+  {
+    title: "Buy resource-saving Dungeoneering rewards before 99 grinds",
+    prerequisites: ["Dungeoneering tokens", "Relevant reward requirements"],
+    description:
+      "Prioritise the gem bag for gem mining, Scroll of efficiency before mass Smithing and Scroll of dexterity before dragonhide Crafting. Permanent material savings are unusually valuable on an Ironman because every refunded bar or hide also saves gathering time.",
+  },
+  {
+    title: "Delay blue dragonhide bodies until Scroll of dexterity",
+    prerequisites: ["60 Dungeoneering", "60 Crafting", "20,000 Dungeoneering tokens"],
+    description:
+      "The scroll gives a 20% chance to save one dragon leather when crafting items that use at least three. Bank blue dragonhides until it is unlocked, then craft bodies for the most XP per leather or shields when faster processing matters more.",
+  },
+  {
+    title: "Use the Skull sceptre as a utility teleport",
+    prerequisites: ["Four sceptre pieces from the Stronghold of Security"],
+    description:
+      "Assemble the Skull sceptre for a teleport to Gunnarsgrunn. The destination is useful for Barbarian Village fly fishing, nearby urn pottery, Runecrafting challenge routes and returning to the Stronghold of Security.",
+  },
+  {
+    title: "Train Smithing inside Artisans’ Workshop",
+    prerequisites: ["Access to Falador", "Bars for the current metal tier"],
+    description:
+      "Use the workshop even when another forge looks convenient, because the same long grind also earns Respect for permanent rewards. Make your required equipment first, then use adamant burial sets from 40 and rune burial sets from 50 for XP.",
+  },
+  {
+    title: "Stretch Cooking supplies with a bonfire and urns",
+    prerequisites: ["A suitable log", "Cooking urns recommended"],
+    description:
+      "Cooking on a self-made bonfire provides 5% extra Cooking XP, while cooking urns add another 20%. Equip a Dwarven army axe when available for an additional 3 Cooking XP per item and keep the best fish reserved for HCIM combat.",
+  },
+];
+const dailyTasks = [
+  {
+    id: "challenges",
+    title: "Complete Daily Challenges",
+    detail: "Finish today’s three challenges and claim their XP rewards.",
+    priority: true,
+  },
+  {
+    id: "feathers",
+    title: "Buy feather stock (3 shops)",
+    detail:
+      "Check Lumbridge Fishing Supplies, Gerrant’s shop in Port Sarim and the Fishing Shop in southern Wendlewick. The two Wendlewick sellers open the same stock.",
+    priority: true,
+  },
+  {
+    id: "runes",
+    title: "Restock useful runes",
+    detail:
+      "Buy the elemental, mind, body, nature and law runes your current Magic plan needs.",
+    priority: true,
+  },
+  {
+    id: "star",
+    title: "Check Shooting Stars",
+    detail:
+      "Mine convenient F2P stars for Mining XP, coins and runes. Star rewards are no longer limited to once per day.",
+  },
+  {
+    id: "evil-tree",
+    title: "Check Evil Tree",
+    detail:
+      "Join a suitable F2P Evil Tree when available for Woodcutting and Firemaking rewards.",
+  },
+  {
+    id: "event",
+    title: "Check active event or minigame",
+    detail:
+      "Use worthwhile Ironman-compatible daily caps; skip unsafe or members-only activities.",
+  },
+];
