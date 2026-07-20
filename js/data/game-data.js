@@ -2,6 +2,7 @@
   quest: { label: "Quests", tag: "Quest" },
   level: { label: "Levels", tag: "Level" },
   boss: { label: "Bosses", tag: "Boss" },
+  unlock: { label: "Unlocks", tag: "Unlock" },
   achievement: { label: "Achievements", tag: "Achievement" },
 };
 

@@ -1,19 +1,19 @@
 ﻿const route = [
   [
     "start",
-    "achievement",
+    "unlock",
     "Activate every F2P lodestone",
     "Unlock Lumbridge, Burthorpe, Taverley, Falador, Port Sarim, Draynor, Varrock, Edgeville, Al Kharid, Ashdale, City of Um, Wendlewick and Wilderness Crater.",
   ],
   [
     "start",
-    "achievement",
+    "unlock",
     "Set up your daily routine",
     "Complete daily challenges, check Shooting Stars, and buy feather stock from Lumbridge, Port Sarim and the new Fishing Shop in Wendlewick.",
   ],
   [
     "start",
-    "achievement",
+    "unlock",
     "Join the F2P Ironman community",
     "Use the F2pironmanfc Friends Chat and Star Find community to locate stars and ask current F2P questions.",
   ],
@@ -92,12 +92,19 @@
   [
     "setup",
     "level",
+    "Train Crafting at the end of Daemonheim floors",
+    "On complexity 6 floors, save your rusty coins until the dungeon is solved. Buy protomastyx hides and thread from the Smuggler, craft protoleather bodies, sell them back and repeat before ending the floor.",
+    "https://runescape.wiki/w/Pay-to-play_Crafting_training#Crafteneering_-_Level_9+",
+  ],
+  [
+    "setup",
+    "level",
     "Combat stats to 40",
     "Train Attack, Strength, Defence, Ranged and Magic; Constitution will follow naturally.",
   ],
   [
     "setup",
-    "achievement",
+    "unlock",
     "Unlock the Cremation ability",
     "Kill ghost-like creatures once they are comfortable targets until Cremation drops. Unlock it immediately, then cremate valuable bones on lit logs for both Prayer and Firemaking XP.",
   ],
@@ -157,7 +164,7 @@
   ],
   [
     "quests",
-    "achievement",
+    "quest",
     "All 45 permanent F2P quests",
     "Finish every permanent F2P quest and end with the hardest combat quests.",
   ],
@@ -175,31 +182,34 @@
   ],
   [
     "power",
-    "achievement",
-    "Lumbridge achievements: Beginner → Hard",
-    "Work through each tier and claim Explorer’s ring rewards as they become available.",
+    "unlock",
+    "Buy early Daemonheim utility rewards",
+    "Use your first tokens on the gem bag at 25 Dungeoneering and Crafting, then buy the level-30 or level-50 combat necklaces that match your main styles.",
+    "https://runescape.wiki/w/Daemonheim_Rewards",
   ],
   [
     "power",
-    "achievement",
-    "Varrock achievements: Easy → Elite",
-    "Complete every F2P-compatible task and benefit from Varrock armour.",
+    "unlock",
+    "Unlock the Nature staff",
+    "At 53 Dungeoneering and Magic, spend 12,500 tokens on the Nature staff. Its 10% chance to save nature runes makes repeated High Level Alchemy more sustainable for an Ironman.",
+    "https://runescape.wiki/w/Daemonheim_Rewards",
   ],
   [
     "power",
-    "achievement",
-    "Daemonheim achievements",
-    "Combine these with Dungeoneering training and resource dungeons.",
+    "unlock",
+    "Buy resource-saving Daemonheim scrolls",
+    "Before the long grinds, unlock Scroll of efficiency at 55 Dungeoneering and Smithing, then Scroll of dexterity at 60 Dungeoneering and Crafting. Each costs 20,000 tokens.",
+    "https://runescape.wiki/w/Daemonheim_Rewards",
   ],
   [
     "power",
-    "achievement",
+    "unlock",
     "Unlock F2P resource dungeons",
     "Use Dungeoneering milestones to open convenient ore, monster and banking locations as they become available.",
   ],
   [
     "power",
-    "achievement",
+    "unlock",
     "Prepare the green dragon bone route",
     "After Dragon Slayer, build reliable Ranged accuracy and bring an anti-dragon shield. Green dragons provide dragon bones for Cremation, but only use this Wilderness route if you knowingly accept the HCIM risk.",
   ],
@@ -214,12 +224,6 @@
     "boss",
     "Ivar, King of Bones",
     "Your first repeatable mechanics boss: enter with 50+ in one combat style, 50+ Defence and preferably 43 Prayer. Every kill guarantees a colossal bone worth 400 Prayer XP when buried.",
-  ],
-  [
-    "boss",
-    "achievement",
-    "Ivar combat achievements",
-    "Progress from your first kill through Broken Bones kill-count milestones, then complete Protect from Ivar and the remaining mechanic challenges.",
   ],
   [
     "boss",
@@ -241,7 +245,7 @@
   ],
   [
     "boss",
-    "achievement",
+    "boss",
     "Boss collection & kill milestones",
     "Build kill count for each boss; pets and rare drops are optional prestige goals.",
   ],
@@ -301,15 +305,9 @@
   ],
   [
     "max",
-    "achievement",
+    "level",
     "17 F2P skills at level 99",
     "The ultimate F2P max milestone.",
-  ],
-  [
-    "max",
-    "achievement",
-    "Maximum HCIM-compatible F2P RuneScore",
-    "Complete every F2P achievement that can actually be earned on a Hardcore Ironman. The complete F2P list currently contains 742 achievements worth 4,525 RuneScore.",
   ],
 ];
 
@@ -325,6 +323,7 @@ const explicitRouteItems = route.map((x, i) => ({
   category: x[1],
   title: x[2],
   desc: x[3],
+  wiki: x[4],
   route: true,
   original: i,
 }));

@@ -151,7 +151,11 @@ function detailsFor(item) {
 }
 
 function updateStats() {
-  const allIds = new Set([...routeItems, ...libraryItems].map((x) => x.id));
+  const allIds = new Set(
+    [...routeItems, ...libraryItems]
+      .filter((item) => item.category !== "achievement")
+      .map((item) => item.id),
+  );
   const done = [...allIds].filter((id) => state.done[id]).length;
   const total = allIds.size,
     pct = total ? Math.round((done / total) * 100) : 0;
@@ -197,6 +201,10 @@ function buildFilters() {
   if (currentView === "grinds" || currentView === "tips") return;
   $("#typeFilter").value = currentCategory;
   const source = currentView === "route" ? routeItems : libraryItems;
+  $("#typeFilter").querySelector('option[value="achievement"]').hidden =
+    currentView === "route";
+  $("#typeFilter").querySelector('option[value="unlock"]').hidden =
+    currentView !== "route";
   const buttons = [
     ["all", "All", source.length],
     ...Object.entries(categories).map(([key, val]) => [
@@ -204,7 +212,7 @@ function buildFilters() {
       val.label,
       source.filter((x) => x.category === key).length,
     ]),
-  ];
+  ].filter(([key, , count]) => key === "all" || count > 0);
   $("#categoryFilters").innerHTML = buttons
     .map(
       ([key, label, count]) =>

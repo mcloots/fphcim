@@ -83,10 +83,22 @@
       "A completed star grants a 15-minute Mining buff with a 25% chance to receive double ore. Move directly to luminite, runite or gem rocks after claiming the reward; the timer pauses while logged out, so prepare the destination first.",
   },
   {
+    title: "Turn leftover rusty coins into Crafting XP",
+    prerequisites: ["9 Crafting", "A complexity 6 Daemonheim floor", "The floor objective completed"],
+    description:
+      "Before ending a floor, spend leftover rusty coins on protomastyx hides and thread from the Smuggler. Craft protoleather bodies, sell them back for more rusty coins and repeat until you can no longer afford another cycle. Rusty coins disappear when you leave, so this adds Crafting XP to Dungeoneering progress without using surface supplies.",
+  },
+  {
+    title: "Build a Daemonheim reward purchase order",
+    prerequisites: ["Dungeoneering tokens", "Levels required by each reward"],
+    description:
+      "Start with the 2,000-token gem bag at 25 Dungeoneering and Crafting. Add the level-30 combat necklaces for 6,500 tokens each, upgrade to the level-50 necklaces for 15,500 each, and buy the 12,500-token Nature staff at 53 Dungeoneering and Magic for a 10% chance to save nature runes.",
+  },
+  {
     title: "Buy resource-saving Dungeoneering rewards before 99 grinds",
     prerequisites: ["Dungeoneering tokens", "Relevant reward requirements"],
     description:
-      "Prioritise the gem bag for gem mining, Scroll of efficiency before mass Smithing and Scroll of dexterity before dragonhide Crafting. Permanent material savings are unusually valuable on an Ironman because every refunded bar or hide also saves gathering time.",
+      "Buy Scroll of efficiency for 20,000 tokens at 55 Dungeoneering and Smithing before mass Smithing. Buy Scroll of dexterity for another 20,000 tokens at 60 Dungeoneering and Crafting before dragonhide Crafting. Permanent material savings are unusually valuable on an Ironman because every refunded bar or hide also saves gathering time.",
   },
   {
     title: "Delay blue dragonhide bodies until Scroll of dexterity",
