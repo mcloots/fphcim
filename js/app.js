@@ -21,6 +21,7 @@ canonicalRouteOrder.forEach((id, index) => {
   state.order.splice(insertAt, 0, id);
 });
 state.grinds ||= {};
+state.profile ||= { username: "", data: null, fetchedAt: null };
 const dailyKey = new Date().toISOString().slice(0, 10);
 if (state.daily?.date !== dailyKey) state.daily = { date: dailyKey, done: {} };
 let currentView = "route",
@@ -249,6 +250,44 @@ function buildPhases() {
   );
 }
 
+function renderProfile() {
+  const profile = state.profile,
+    status = $("#profileStatus"),
+    input = $("#rsnInput"),
+    clear = $("#profileClear");
+  input.value = profile.username || "";
+  clear.hidden = !profile.data;
+  if (!profile.data) {
+    if (!status.classList.contains("error")) status.textContent = "No character connected.";
+    return;
+  }
+  const updated = new Date(profile.fetchedAt || profile.data.fetchedAt);
+  status.className = "connected";
+  status.textContent = `${profile.data.name} · total level ${profile.data.totalLevel?.toLocaleString("en-GB") || "unknown"} · synced ${updated.toLocaleString("en-GB")}`;
+}
+
+async function syncProfile(username, quiet = false) {
+  const status = $("#profileStatus"),
+    submit = $("#profileForm button[type='submit']");
+  submit.disabled = true;
+  status.className = "loading";
+  if (!quiet) status.textContent = "Loading character levels…";
+  try {
+    const result = await fetch(`/api/rs-profile?user=${encodeURIComponent(username)}`),
+      payload = await result.json();
+    if (!result.ok) throw new Error(payload.error || "Could not load this character.");
+    state.profile = { username: payload.name || username, data: payload, fetchedAt: Date.now() };
+    save();
+    renderProfile();
+    render();
+  } catch (error) {
+    status.className = "error";
+    status.textContent = `${error.message} Check that the display name is correct and the RuneMetrics profile is public.`;
+  } finally {
+    submit.disabled = false;
+  }
+}
+
 function renderJourneyDashboard(source) {
   const dashboard = $("#journeyDashboard");
   dashboard.hidden = currentView !== "route";
@@ -333,6 +372,10 @@ function filtered(items) {
 
 function card(x) {
   const details = detailsFor(x);
+  const readiness = window.RSProfile?.evaluate(x, state.profile.data);
+  const readinessBadge = readiness
+    ? `<span class="readiness ${readiness.status}" title="${readiness.detail}">${readiness.label}</span>`
+    : "";
   const rewards =
     x.category === "quest" ? questXp[x.title.replaceAll("’", "'")] : null;
   const xpBadges = rewards
@@ -349,7 +392,7 @@ function card(x) {
     <span class="drag" title="Drag to reorder">${currentView === "route" ? "⠿" : ""}</span>
     <input class="check" type="checkbox" ${state.done[x.id] ? "checked" : ""} aria-label="Mark ${x.title} as completed">
     <div><div class="milestone-title">${x.title}</div><div class="milestone-desc">${x.desc}</div>${xpBadges ? `<div class="quest-xp" aria-label="Quest experience rewards">${xpBadges}</div>` : ""}</div>
-    <div class="milestone-meta"><span class="tag ${x.category}">${categories[x.category].tag}</span><button class="details-toggle" type="button" aria-expanded="false" title="Show details">⌄</button></div>
+    <div class="milestone-meta"><span class="tag ${x.category}">${categories[x.category].tag}</span>${readinessBadge}<button class="details-toggle" type="button" aria-expanded="false" title="Show details">⌄</button></div>
     <div class="milestone-details" hidden><strong>${details.heading}</strong><ul>${details.rows.map((row) => `<li>${row}</li>`).join("")}</ul><a href="${wikiUrl(x)}" target="_blank" rel="noreferrer">Open full RuneScape Wiki guide <span>↗</span></a></div>
   </article>`;
 }
@@ -599,6 +642,17 @@ $("#typeFilter").onchange = (e) => {
   buildFilters();
   render();
 };
+$("#profileForm").onsubmit = (event) => {
+  event.preventDefault();
+  syncProfile($("#rsnInput").value.trim());
+};
+$("#profileClear").onclick = () => {
+  state.profile = { username: "", data: null, fetchedAt: null };
+  save();
+  $("#profileStatus").className = "";
+  renderProfile();
+  render();
+};
 $("#exportBtn").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], {
       type: "application/json",
@@ -617,7 +671,9 @@ $("#importFile").onchange = (e) => {
   reader.onload = () => {
     try {
       Object.assign(state, JSON.parse(reader.result));
+      state.profile ||= { username: "", data: null, fetchedAt: null };
       save();
+      renderProfile();
       render();
     } catch {
       alert("This file does not contain valid Iron Path progress.");
@@ -633,5 +689,11 @@ $("#resetBtn").onclick = () => {
 };
 buildFilters();
 buildPhases();
+renderProfile();
 render();
 renderDaily();
+if (
+  state.profile.username &&
+  (!state.profile.fetchedAt || Date.now() - state.profile.fetchedAt > 60 * 60 * 1000)
+)
+  syncProfile(state.profile.username, true);

@@ -20,6 +20,11 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[redirects]]
+  from = "/api/rs-profile"
+  to = "/.netlify/functions/rs-profile"
+  status = 200
+
+[[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
