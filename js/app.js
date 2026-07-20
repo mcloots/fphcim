@@ -282,7 +282,10 @@ async function syncProfile(username, quiet = false) {
     render();
   } catch (error) {
     status.className = "error";
-    status.textContent = `${error.message} Check that the display name is correct and the RuneMetrics profile is public.`;
+    status.textContent =
+      error instanceof TypeError
+        ? "The profile service could not be reached. Profile sync works on the deployed site; local static previews do not run the server function."
+        : `${error.message} Check that the display name is correct and the RuneMetrics profile is public.`;
   } finally {
     submit.disabled = false;
   }
@@ -376,6 +379,16 @@ function card(x) {
   const readinessBadge = readiness
     ? `<span class="readiness ${readiness.status}" title="${readiness.detail}">${readiness.label}</span>`
     : "";
+  const missingDetails = readiness?.missing?.length
+    ? `<div class="missing-requirements"><strong>Levels still required</strong><div>${readiness.missing
+        .map(
+          (requirement) =>
+            `<span class="missing-skill"><b>${requirement.skill}</b><i><em style="width:${Math.min(100, Math.round((requirement.current / requirement.required) * 100))}%"></em></i><small><b>${requirement.current}</b> → ${requirement.required} · ${requirement.remaining} level${requirement.remaining === 1 ? "" : "s"} to go</small></span>`,
+        )
+        .join("")}</div></div>`
+    : readiness?.questLocked
+      ? `<div class="missing-requirements quest-locked"><strong>Requirements not met</strong><p>RuneMetrics reports that this quest cannot be started yet. Open the milestone details or Wiki guide to check the missing prerequisite quests and levels.</p></div>`
+      : "";
   const rewards =
     x.category === "quest" ? questXp[x.title.replaceAll("’", "'")] : null;
   const xpBadges = rewards
@@ -391,7 +404,7 @@ function card(x) {
   return `<article class="milestone ${state.done[x.id] ? "done" : ""}" draggable="${currentView === "route"}" data-id="${x.id}">
     <span class="drag" title="Drag to reorder">${currentView === "route" ? "⠿" : ""}</span>
     <input class="check" type="checkbox" ${state.done[x.id] ? "checked" : ""} aria-label="Mark ${x.title} as completed">
-    <div><div class="milestone-title">${x.title}</div><div class="milestone-desc">${x.desc}</div>${xpBadges ? `<div class="quest-xp" aria-label="Quest experience rewards">${xpBadges}</div>` : ""}</div>
+    <div><div class="milestone-title">${x.title}</div><div class="milestone-desc">${x.desc}</div>${xpBadges ? `<div class="quest-xp" aria-label="Quest experience rewards">${xpBadges}</div>` : ""}${missingDetails}</div>
     <div class="milestone-meta"><span class="tag ${x.category}">${categories[x.category].tag}</span>${readinessBadge}<button class="details-toggle" type="button" aria-expanded="false" title="Show details">⌄</button></div>
     <div class="milestone-details" hidden><strong>${details.heading}</strong><ul>${details.rows.map((row) => `<li>${row}</li>`).join("")}</ul><a href="${wikiUrl(x)}" target="_blank" rel="noreferrer">Open full RuneScape Wiki guide <span>↗</span></a></div>
   </article>`;

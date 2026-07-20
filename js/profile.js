@@ -37,7 +37,12 @@
         if (/completed/i.test(quest.status)) return { status: "complete", label: "Quest complete", detail: "Completed in game" };
         return quest.eligible
           ? { status: "ready", label: "Ready", detail: "Quest requirements met" }
-          : { status: "locked", label: "Not ready", detail: "Quest requirements not met" };
+          : {
+              status: "locked",
+              label: "Not ready",
+              detail: "One or more quest or skill requirements are still missing.",
+              questLocked: true,
+            };
       }
     }
 
@@ -50,6 +55,12 @@
       status: "locked",
       label: "Missing levels",
       detail: missing.map(({ skill, level }) => `${skill} ${data.skills[skill] || 1}/${level}`).join(", "),
+      missing: missing.map(({ skill, level }) => ({
+        skill,
+        current: data.skills[skill] || 1,
+        required: level,
+        remaining: Math.max(0, level - (data.skills[skill] || 1)),
+      })),
     };
   }
 
