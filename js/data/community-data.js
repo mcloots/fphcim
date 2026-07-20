@@ -25,7 +25,7 @@
   },
   {
     title: "Sell rune arrows for repeatable late-game cash",
-    prerequisites: ["75 Fletching", "Rune arrowheads from Smithing", "A sustained feather supply"],
+    prerequisites: ["50 Fletching", "50 Smithing for rune arrowheads", "A sustained feather supply"],
     description:
       "Fletch rune arrows from your ores and feather stock, then sell surplus arrows to a General Store for 153 coins each. This connects Mining, Smithing and Fletching without consuming nature runes. Keep a combat ammunition reserve before selling the rest.",
   },

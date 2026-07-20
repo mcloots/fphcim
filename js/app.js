@@ -25,7 +25,8 @@ const dailyKey = new Date().toISOString().slice(0, 10);
 if (state.daily?.date !== dailyKey) state.daily = { date: dailyKey, done: {} };
 let currentView = "route",
   currentCategory = "all",
-  currentPhase = "all";
+  currentPhase = "all",
+  routeDisplay = "focus";
 
 const $ = (s) => document.querySelector(s);
 const save = () => localStorage.setItem("ironPathState", JSON.stringify(state));
@@ -222,7 +223,7 @@ function buildFilters() {
 }
 
 function buildPhases() {
-  $("#phaseNav").hidden = currentView !== "route";
+  $("#phaseNav").hidden = currentView !== "route" || routeDisplay === "focus";
   $("#phaseNav").innerHTML = [
     `<button class="phase-btn ${currentPhase === "all" ? "active" : ""}" data-phase="all">Full route</button>`,
     ...phases.map(
@@ -238,6 +239,76 @@ function buildPhases() {
         render();
       }),
   );
+}
+
+function renderJourneyDashboard(source) {
+  const dashboard = $("#journeyDashboard");
+  dashboard.hidden = currentView !== "route";
+  if (currentView !== "route") return;
+
+  const completed = source.filter((item) => state.done[item.id]).length;
+  const percent = Math.round((completed / source.length) * 100);
+  const next = source.find((item) => !state.done[item.id]);
+  const activePhase = next?.phase || phases.at(-1).id;
+  dashboard.innerHTML = `
+    <div class="journey-summary">
+      <div><span class="journey-label">JOURNEY MAP</span><h3>${next ? "Your next chapter" : "Journey complete"}</h3><p>${completed} of ${source.length} milestones completed</p></div>
+      <div class="route-display" aria-label="Recommended path display">
+        <button type="button" data-display="focus" class="${routeDisplay === "focus" ? "active" : ""}">Focus</button>
+        <button type="button" data-display="full" class="${routeDisplay === "full" ? "active" : ""}">Full checklist</button>
+      </div>
+      <div class="journey-progress" aria-label="${percent}% complete"><span style="width:${percent}%"></span></div>
+    </div>
+    <div class="journey-map">
+      ${phases
+        .map((phase, index) => {
+          const group = source.filter((item) => item.phase === phase.id);
+          const done = group.filter((item) => state.done[item.id]).length;
+          const phasePercent = group.length ? Math.round((done / group.length) * 100) : 0;
+          const status = done === group.length ? "complete" : phase.id === activePhase ? "current" : "";
+          return `<button type="button" class="journey-stage ${status}" data-journey-phase="${phase.id}">
+            <span class="stage-index">${done === group.length ? "✓" : index + 1}</span>
+            <span class="stage-copy"><b>${phase.name}</b><small>${done} / ${group.length}</small><i><em style="width:${phasePercent}%"></em></i></span>
+          </button>`;
+        })
+        .join("")}
+    </div>
+    ${
+      next
+        ? `<div class="current-objective">
+            <div class="objective-marker"><span>Current objective</span><b>${categories[next.category].tag}</b></div>
+            <div><h4>${next.title}</h4><p>${next.desc}</p></div>
+            <button type="button" data-complete-next="${next.id}">Mark complete <span>✓</span></button>
+          </div>`
+        : `<div class="current-objective complete"><div><h4>Every recommended milestone is complete</h4><p>Your full F2P journey remains available as a checklist and can still be reordered.</p></div></div>`
+    }
+  `;
+
+  dashboard.querySelectorAll("[data-display]").forEach((button) => {
+    button.onclick = () => {
+      routeDisplay = button.dataset.display;
+      currentPhase = "all";
+      buildPhases();
+      render();
+    };
+  });
+  dashboard.querySelectorAll("[data-journey-phase]").forEach((button) => {
+    button.onclick = () => {
+      currentPhase = button.dataset.journeyPhase;
+      routeDisplay = "full";
+      buildPhases();
+      render();
+      $("#milestoneList").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  });
+  const completeNext = dashboard.querySelector("[data-complete-next]");
+  if (completeNext)
+    completeNext.onclick = () => {
+      state.done[completeNext.dataset.completeNext] = true;
+      save();
+      render();
+      updateStats();
+    };
 }
 
 function filtered(items) {
@@ -293,10 +364,19 @@ function render() {
           (a, b) => state.order.indexOf(a.id) - state.order.indexOf(b.id),
         )
       : libraryItems;
+  renderJourneyDashboard(source);
   const items = filtered(source),
     list = $("#milestoneList");
+  const defaultFocus =
+    currentView === "route" &&
+    routeDisplay === "focus" &&
+    currentPhase === "all" &&
+    currentCategory === "all" &&
+    !$("#searchInput").value &&
+    $("#statusFilter").value === "all";
   if (
     currentView === "route" &&
+    !defaultFocus &&
     currentPhase === "all" &&
     currentCategory === "all" &&
     !$("#searchInput").value &&
@@ -308,7 +388,17 @@ function render() {
         return `<div class="phase-heading"><span class="phase-number">${i + 1}</span><div><h3>${p.name}</h3><p>${p.desc}</p></div></div>${group.map(card).join("")}`;
       })
       .join("");
-  } else list.innerHTML = items.map(card).join("");
+  } else {
+    const visibleItems = defaultFocus
+      ? items.filter((item) => !state.done[item.id]).slice(0, 3)
+      : items;
+    list.innerHTML = visibleItems.map(card).join("");
+    if (defaultFocus && visibleItems.length)
+      list.insertAdjacentHTML(
+        "afterbegin",
+        '<div class="focus-heading"><span>UP NEXT</span><h3>Keep the momentum going</h3><p>Your next three milestones, in your chosen order.</p></div>',
+      );
+  }
   $("#emptyState").hidden = items.length > 0;
   list.querySelectorAll(".check").forEach(
     (c) =>
@@ -338,6 +428,7 @@ function render() {
 }
 
 function renderTips() {
+  $("#journeyDashboard").hidden = true;
   $("#grindTracker").hidden = true;
   $("#milestoneList").hidden = true;
   $("#emptyState").hidden = true;
@@ -365,6 +456,7 @@ function renderTips() {
 }
 
 function renderGrinds() {
+  $("#journeyDashboard").hidden = true;
   const tracker = $("#grindTracker");
   tracker.hidden = false;
   $("#tipsPage").hidden = true;

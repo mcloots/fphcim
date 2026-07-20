@@ -87,7 +87,7 @@
     "setup",
     "level",
     "Woodcutting, Firemaking & Fletching 50",
-    "Use logs across three skills and make your own ranged ammunition and shortbows.",
+    "Use logs across three skills. Make tier-40 maple and tier-50 acadia shortbows, then fletch rune arrows at level 50; yew bows are members-only.",
   ],
   [
     "setup",
@@ -255,7 +255,7 @@
     "max",
     "level",
     "Woodcutting → Fletching & Firemaking 99",
-    "Distribute logs deliberately between bows and bonfires.",
+    "Split maple and acadia logs between F2P bows, arrow shafts and bonfires. Use yew logs for Firemaking rather than bows, and turn rune bars plus feathers into rune arrows for Fletching XP.",
   ],
   [
     "max",

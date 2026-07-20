@@ -209,9 +209,10 @@ const skillMethods = {
     "Save cut gems for useful jewellery and urns; gather ingredients in batches to reduce travel.",
   ],
   Fletching: [
-    "Make the highest shortbows available from your Woodcutting logs, then string them when bowstrings are worth sourcing.",
-    "Create your own arrows, bolts and bows to support Ranged training.",
-    "Shortbows are generally the practical XP route; reserve ammunition supplies before using all logs for bows.",
+    "Follow the retiered F2P bow path: maple shortbows are tier 40 and acadia shortbows are tier 50. Yew bows are now members-only.",
+    "Arrow unlocks now match their metal tier: iron at 10, steel at 20, mithril at 30, adamant at 40 and rune at 50 Fletching.",
+    "Crossbows now unlock at 3/13/23/33/43/53 Fletching from bronze through rune; a rune crossbow still requires 50 Smithing for its limbs.",
+    "Rune arrows give 12.5 Fletching XP each at level 50. Reserve enough ammunition for Ranged before selling surplus arrows.",
   ],
 };
 
@@ -240,11 +241,11 @@ const bossDetails = {
   ],
   "Giant Mole": [
     "Suggested HCIM baseline: 60+ combat stats, tier 50 gear, protection prayers and a full food inventory.",
-    "Use an instance, track its digging phases and leave early if supplies fall below your safety margin.",
+    "Private boss instances no longer charge an entry fee. Use one, track the Mole's digging phases and leave early if supplies fall below your safety margin.",
   ],
   "King Black Dragon": [
     "Suggested HCIM baseline: 70+ combat stats, dragonfire protection, prayer and strong food.",
-    "Access through the Grouping System where possible; avoid carrying valuables through the Wilderness.",
+    "Private boss instances no longer charge an entry fee. Access through the Grouping System where possible and avoid carrying valuables through the Wilderness.",
   ],
   "Chaos Elemental": [
     "Suggested: 70+ combat stats, cheap replaceable gear and free inventory spaces.",
