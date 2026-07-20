@@ -78,6 +78,7 @@
     <nav class="topbar" aria-label="Main navigation">
       <a class="brand" href="#top"><span class="brand-mark">IP</span><span>IRON PATH</span></a>
       <div class="nav-actions">
+        <a class="report-link" href="report-error.html">Report an error</a>
         <button class="icon-btn" id="exportBtn" title="Export progress" aria-label="Export progress">⇩</button>
         <button class="icon-btn" id="importBtn" title="Import progress" aria-label="Import progress">⇧</button>
         <button class="icon-btn danger" id="resetBtn" title="Reset progress" aria-label="Reset progress">↺</button>
@@ -150,7 +151,7 @@
         <div id="grindTracker" class="grind-tracker" hidden></div>
         <div id="tipsPage" class="tips-page" hidden>
           <section class="tip-submit">
-            <div><span>Share your knowledge</span><h3>Submit an F2P Ironman tip</h3><p>Your email address is not requested or stored. Submissions are filtered by Netlify and reviewed before publication.</p></div>
+            <div><span>Share your knowledge</span><h3>Submit an F2P Ironman tip</h3><p>Your email address is not requested or stored. Submissions are spam-filtered and reviewed before publication.</p></div>
             <form id="tipForm" name="community-tip" method="POST" data-netlify="true" netlify-honeypot="bot-field">
               <input type="hidden" name="form-name" value="community-tip">
               <p class="bot-field" aria-hidden="true"><label>Do not fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
@@ -181,7 +182,7 @@
     </div>
   </section>
 
-  <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd.</p></footer>
+  <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd. · <a href="report-error.html">Report an error</a></p></footer>
   <script src="achievement-data.js"></script>
   <script src="js/data/game-data.js"></script>
   <script src="js/data/route-data.js"></script>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report an Error | Iron Path RS3 F2P Guide</title>
+  <meta name="description" content="Report incorrect or outdated information in the Iron Path RuneScape 3 F2P Ironman and Hardcore Ironman guide.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#172019">
+  <link rel="canonical" href="https://rs3-f2p-hcim.netlify.app/report-error.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Iron Path">
+  <meta property="og:title" content="Report an Error | Iron Path">
+  <meta property="og:description" content="Help keep the RS3 F2P Ironman journey accurate by reporting outdated or incorrect information.">
+  <meta property="og:url" content="https://rs3-f2p-hcim.netlify.app/report-error.html">
+  <meta property="og:image" content="https://rs3-f2p-hcim.netlify.app/assets/iron-path-social.jpg">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report-error.css">
+</head>
+<body class="report-page">
+  <header class="report-header">
+    <nav class="topbar" aria-label="Main navigation">
+      <a class="brand" href="index.html"><span class="brand-mark">IP</span><span>IRON PATH</span></a>
+      <a class="report-back" href="index.html">Back to planner <span>→</span></a>
+    </nav>
+    <div class="report-heading section-inner">
+      <p class="eyebrow">KEEP THE PATH ACCURATE</p>
+      <h1>Report an error</h1>
+      <p>Found outdated requirements, a missing F2P milestone or advice that no longer works? Send the correction here for review.</p>
+    </div>
+  </header>
+
+  <main class="report-main section-inner">
+    <section class="report-context" aria-labelledby="reportContextTitle">
+      <p class="kicker">BEFORE SUBMITTING</p>
+      <h2 id="reportContextTitle">A useful report is specific</h2>
+      <p>Name the affected page or milestone, explain what is currently wrong and describe the correct information. A RuneScape Wiki or official patch-note link is especially helpful.</p>
+      <div class="report-privacy">
+        <strong>No account details needed</strong>
+        <p>Do not include your RuneScape login, real name or other private information. Your progress stored in the planner is never attached.</p>
+      </div>
+    </section>
+
+    <section class="report-form-wrap" aria-labelledby="reportFormTitle">
+      <div class="form-heading"><span>ERROR REPORT</span><h2 id="reportFormTitle">What should be corrected?</h2></div>
+      <form id="errorReportForm" name="error-report" method="POST" action="/report-error.html?submitted=true" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="error-report">
+        <p class="bot-field" aria-hidden="true"><label>Do not fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+        <div class="form-row">
+          <label>Error type<select name="error-type" required><option value="">Choose a type</option><option>Incorrect requirement or level</option><option>Outdated training method</option><option>Missing F2P content</option><option>Broken link or interface</option><option>Spelling or wording</option><option>Other</option></select></label>
+          <label>Affected section<select name="section" required><option value="">Choose a section</option><option>Recommended path</option><option>All milestones</option><option>99 Grind tracker</option><option>Community tips</option><option>Daily reminders</option><option>Other</option></select></label>
+        </div>
+        <label>Short title<input name="title" type="text" maxlength="120" placeholder="Example: Rune arrow Fletching level is outdated" required></label>
+        <label>What is currently wrong?<textarea name="current-information" rows="5" maxlength="2000" required></textarea></label>
+        <label>What should it say or do instead?<textarea name="expected-information" rows="5" maxlength="2000" required></textarea></label>
+        <label>Supporting source <small>Optional</small><input name="source-url" type="url" maxlength="500" placeholder="https://runescape.wiki/w/..."></label>
+        <label class="confirmation"><input name="accuracy-confirmation" type="checkbox" value="confirmed" required><span>I have checked that this report concerns RuneScape 3 free-to-play content.</span></label>
+        <button class="report-submit" type="submit">Submit error report <span>→</span></button>
+        <p id="reportStatus" class="report-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer><span>IRON PATH</span><p>Independent personal planner. RuneScape is a trademark of Jagex Ltd.</p></footer>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("submitted") === "true") {
+      const status = document.querySelector("#reportStatus");
+      status.textContent = "Thank you. Your error report has been submitted for review.";
+      status.classList.add("success");
+      status.scrollIntoView({ block: "center" });
+      history.replaceState({}, "", window.location.pathname);
+    }
+  </script>
+</body>
+</html>
