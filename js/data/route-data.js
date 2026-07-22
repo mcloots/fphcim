@@ -87,7 +87,7 @@
     "setup",
     "level",
     "Woodcutting, Firemaking & Fletching 50",
-    "Use logs across three skills. Make tier-40 maple and tier-50 acadia shortbows, then fletch rune arrows at level 50; yew bows are members-only.",
+    "Use logs across three skills. At 45 Fletching, turn acadia logs into arrow shafts; acadia is the highest-level F2P tree that still supports shafts. Make tier-50 acadia shortbows and rune arrows at level 50; yew bows are members-only.",
   ],
   [
     "setup",
@@ -259,7 +259,7 @@
     "max",
     "level",
     "Woodcutting → Fletching & Firemaking 99",
-    "Split maple and acadia logs between F2P bows, arrow shafts and bonfires. Use yew logs for Firemaking rather than bows, and turn rune bars plus feathers into rune arrows for Fletching XP.",
+    "Reserve acadia logs for arrow shafts before using surplus logs on F2P bows or bonfires. Acadia is the highest-level F2P tree that supports shafts. Use yew logs for Firemaking rather than bows, and turn rune bars plus feathers into rune arrows for Fletching XP.",
   ],
   [
     "max",

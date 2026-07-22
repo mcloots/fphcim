@@ -21,6 +21,7 @@ canonicalRouteOrder.forEach((id, index) => {
   state.order.splice(insertAt, 0, id);
 });
 state.grinds ||= {};
+state.inventory ||= {};
 state.profile ||= { username: "", data: null, fetchedAt: null };
 const dailyKey = new Date().toISOString().slice(0, 10);
 if (state.daily?.date !== dailyKey) state.daily = { date: dailyKey, done: {} };
@@ -291,6 +292,63 @@ async function syncProfile(username, quiet = false) {
   }
 }
 
+function smartNextSteps(source) {
+  const incomplete = source.filter((item) => !state.done[item.id]);
+  if (!incomplete.length) return [];
+  const routePosition = new Map(source.map((item, index) => [item.id, index]));
+  const rank = (item) => {
+    const readiness = window.RSProfile?.evaluate(item, state.profile.data);
+    const statusRank = { complete: 0, ready: 1, info: 2, locked: 3 };
+    const missingLevels = readiness?.missing?.reduce(
+      (total, requirement) => total + requirement.remaining,
+      0,
+    );
+    return {
+      readiness,
+      status: statusRank[readiness?.status] ?? 2,
+      distance:
+        readiness?.status === "locked"
+          ? missingLevels || (readiness.questLocked ? 9999 : 999)
+          : 0,
+    };
+  };
+
+  return phases.flatMap((phase) =>
+    incomplete
+      .filter((item) => item.phase === phase.id)
+      .map((item) => ({ item, ...rank(item) }))
+      .sort(
+        (a, b) =>
+          a.status - b.status ||
+          a.distance - b.distance ||
+          routePosition.get(a.item.id) - routePosition.get(b.item.id),
+      ),
+  );
+}
+
+function smartReason(candidate) {
+  if (!candidate) return "";
+  const readiness = candidate.readiness;
+  if (!state.profile.data)
+    return "Connect your character to rank this chapter using current levels.";
+  if (readiness?.status === "complete")
+    return "RuneMetrics shows this quest as complete. Confirm it in your planner.";
+  if (readiness?.status === "ready")
+    return readiness.detail === "Quest requirements met"
+      ? "All quest requirements are met on your synced character."
+      : `Your synced levels meet: ${readiness.detail}.`;
+  if (readiness?.missing?.length) {
+    const levels = readiness.missing.reduce(
+      (total, requirement) => total + requirement.remaining,
+      0,
+    );
+    return `Closest detected level unlock in this chapter · ${levels} total level${levels === 1 ? "" : "s"} remaining.`;
+  }
+  if (readiness?.questLocked)
+    return "A prerequisite quest or skill is still missing. Check the milestone details for the dependency chain.";
+  return "No hard level gate was detected, so this follows your chosen route order.";
+}
+
 function renderJourneyDashboard(source) {
   const dashboard = $("#journeyDashboard");
   dashboard.hidden = currentView !== "route";
@@ -298,13 +356,15 @@ function renderJourneyDashboard(source) {
 
   const completed = source.filter((item) => state.done[item.id]).length;
   const percent = Math.round((completed / source.length) * 100);
-  const next = source.find((item) => !state.done[item.id]);
+  const smartCandidates = smartNextSteps(source);
+  const nextCandidate = smartCandidates[0];
+  const next = nextCandidate?.item;
   const activePhase = next?.phase || phases.at(-1).id;
   dashboard.innerHTML = `
     <div class="journey-summary">
       <div><span class="journey-label">JOURNEY MAP</span><h3>${next ? "Your next chapter" : "Journey complete"}</h3><p>${completed} of ${source.length} milestones completed</p></div>
       <div class="route-display" aria-label="Recommended path display">
-        <button type="button" data-display="focus" class="${routeDisplay === "focus" ? "active" : ""}">Focus</button>
+        <button type="button" data-display="focus" class="${routeDisplay === "focus" ? "active" : ""}">Smart focus</button>
         <button type="button" data-display="full" class="${routeDisplay === "full" ? "active" : ""}">Full checklist</button>
       </div>
       <div class="journey-progress" aria-label="${percent}% complete"><span style="width:${percent}%"></span></div>
@@ -326,8 +386,8 @@ function renderJourneyDashboard(source) {
     ${
       next
         ? `<div class="current-objective">
-            <div class="objective-marker"><span>Current objective</span><b>${categories[next.category].tag}</b></div>
-            <div><h4>${next.title}</h4><p>${next.desc}</p></div>
+            <div class="objective-marker"><span>Smart next step</span><b>${categories[next.category].tag}</b></div>
+            <div><h4>${next.title}</h4><p>${next.desc}</p><span class="objective-reason ${nextCandidate.readiness?.status || "info"}">${smartReason(nextCandidate)}</span></div>
             <button type="button" data-complete-next="${next.id}">Mark complete <span>✓</span></button>
           </div>`
         : `<div class="current-objective complete"><div><h4>Every recommended milestone is complete</h4><p>Your full F2P journey remains available as a checklist and can still be reordered.</p></div></div>`
@@ -379,15 +439,24 @@ function card(x) {
   const readinessBadge = readiness
     ? `<span class="readiness ${readiness.status}" title="${readiness.detail}">${readiness.label}</span>`
     : "";
-  const missingDetails = readiness?.missing?.length
-    ? `<div class="missing-requirements"><strong>Levels still required</strong><div>${readiness.missing
+  const dependencyNodes = readiness?.dependencies?.length
+    ? `${readiness.dependencies
+        .map((dependency) =>
+          dependency.type === "quest"
+            ? `<a class="dependency-node ${dependency.complete ? "complete" : "missing"}" href="https://runescape.wiki/w/${encodeURIComponent(dependency.title.replaceAll(" ", "_"))}" target="_blank" rel="noreferrer"><small>Quest</small><b>${dependency.title}</b><span>${dependency.complete ? "Complete" : "Required"}</span></a>`
+            : `<span class="dependency-node ${dependency.complete ? "complete" : "missing"}"><small>Skill</small><b>${dependency.title} ${dependency.required}</b><span>${dependency.current} / ${dependency.required}${dependency.complete ? " · Ready" : ` · ${dependency.required - dependency.current} to go`}</span></span>`,
+        )
+        .join('<i class="dependency-arrow">→</i>')}<i class="dependency-arrow">→</i>`
+    : "";
+  const missingDetails = readiness?.questLocked
+    ? `<div class="missing-requirements quest-locked"><strong>Quest dependency chain</strong>${dependencyNodes ? `<div class="dependency-chain">${dependencyNodes}<span class="dependency-node target"><small>Target quest</small><b>${x.title}</b><span>Locked</span></span></div>` : ""}<p>${dependencyNodes ? "Complete the missing nodes from left to right. Some quests may also have item, Quest Point or combat recommendations shown in the full guide." : "RuneMetrics reports that this quest cannot be started yet, but the Wiki template exposes no hard skill or prerequisite-quest gate. Check the full guide for Quest Points, items or other conditions."}</p></div>`
+    : readiness?.missing?.length
+      ? `<div class="missing-requirements"><strong>Levels still required</strong><div>${readiness.missing
         .map(
           (requirement) =>
             `<span class="missing-skill"><b>${requirement.skill}</b><i><em style="width:${Math.min(100, Math.round((requirement.current / requirement.required) * 100))}%"></em></i><small><b>${requirement.current}</b> → ${requirement.required} · ${requirement.remaining} level${requirement.remaining === 1 ? "" : "s"} to go</small></span>`,
         )
         .join("")}</div></div>`
-    : readiness?.questLocked
-      ? `<div class="missing-requirements quest-locked"><strong>Requirements not met</strong><p>RuneMetrics reports that this quest cannot be started yet. Open the milestone details or Wiki guide to check the missing prerequisite quests and levels.</p></div>`
       : "";
   const rewards =
     x.category === "quest" ? questXp[x.title.replaceAll("’", "'")] : null;
@@ -454,13 +523,13 @@ function render() {
       .join("");
   } else {
     const visibleItems = defaultFocus
-      ? items.filter((item) => !state.done[item.id]).slice(0, 3)
+      ? smartNextSteps(items).slice(0, 3).map((candidate) => candidate.item)
       : items;
     list.innerHTML = visibleItems.map(card).join("");
     if (defaultFocus && visibleItems.length)
       list.insertAdjacentHTML(
         "afterbegin",
-        '<div class="focus-heading"><span>UP NEXT</span><h3>Keep the momentum going</h3><p>Your next three milestones, in your chosen order.</p></div>',
+        `<div class="focus-heading"><span>SMART NEXT STEPS</span><h3>Keep the momentum going</h3><p>${state.profile.data ? "Ranked by chapter, readiness and distance to unlock." : "Connect your character to rank these milestones using live levels."}</p></div>`,
       );
   }
   $("#emptyState").hidden = items.length > 0;
@@ -519,14 +588,92 @@ function renderTips() {
   };
 }
 
+const inventoryResource = (id) =>
+  inventoryResources.find((resource) => resource.id === id);
+
+function bankAmount(id, includeRuneOre = false) {
+  const banked = Math.max(0, Number(state.inventory[id]) || 0);
+  if (id !== "rune_bars" || !includeRuneOre) return banked;
+  return (
+    banked +
+    Math.min(
+      Math.max(0, Number(state.inventory.runite_ore) || 0),
+      Math.max(0, Number(state.inventory.luminite) || 0),
+    )
+  );
+}
+
+function getBankCoverage(rule) {
+  if (!rule?.inputs?.length) return 0;
+  return Math.floor(
+    Math.min(
+      ...rule.inputs.map(
+        ([id, perAction]) =>
+          bankAmount(id, rule.includeRuneOre) / perAction,
+      ),
+    ),
+  );
+}
+
+function getBankDetail(rule, coverage) {
+  if (rule?.inputs) {
+    const stock = rule.inputs
+      .map(([id, perAction]) => {
+        const label = inventoryResource(id)?.label || id;
+        return `${fmt(bankAmount(id, rule.includeRuneOre))} ${label}${perAction > 1 ? ` (${perAction} each)` : ""}`;
+      })
+      .join(" + ");
+    return `<div class="bank-coverage"><span>Covered by bank</span><strong>${fmt(coverage)} actions</strong><small>${stock}</small></div>`;
+  }
+  if (rule?.output) {
+    const resource = inventoryResource(rule.output);
+    return `<div class="bank-coverage bank-output"><span>Already banked output</span><strong>${fmt(bankAmount(rule.output))}</strong><small>${resource?.label || rule.output} does not reduce the XP grind</small></div>`;
+  }
+  return `<div class="bank-coverage"><span>Bank requirement</span><strong>None</strong><small>This method does not use a tracked resource</small></div>`;
+}
+
+function migrateLegacyGrindStock() {
+  if (state.inventoryMigrated) return;
+  grindSkills.forEach((grind) => {
+    const saved = state.grinds[grind.skill];
+    if (!saved?.have) return;
+    const method = grind.methods[saved.method || 0];
+    const rule = grindResourceRules[`${grind.skill}:${method[0]}`];
+    if (rule?.inputs?.length !== 1) return;
+    const [resourceId, perAction] = rule.inputs[0];
+    state.inventory[resourceId] = Math.max(
+      bankAmount(resourceId),
+      Math.floor(saved.have * perAction),
+    );
+  });
+  state.inventoryMigrated = true;
+  save();
+}
+
 function renderGrinds() {
+  migrateLegacyGrindStock();
   $("#journeyDashboard").hidden = true;
   const tracker = $("#grindTracker");
   tracker.hidden = false;
   $("#tipsPage").hidden = true;
   $("#milestoneList").hidden = true;
   $("#emptyState").hidden = true;
-  tracker.innerHTML = `<div class="grind-summary"><strong>Resource estimates to level 99</strong><p>Enter your current level or exact total XP, choose a method, and record resources already gathered. Estimates exclude bonus XP, failed cooks and method-specific boosts.</p></div>${grindSkills
+  const inventoryGroups = inventoryResources.reduce((groups, resource) => {
+    (groups[resource.group] ||= []).push(resource);
+    return groups;
+  }, {});
+  const inventoryMarkup = `<section class="resource-inventory" id="resourceInventory"><header><div><span>Shared bank stock</span><h2>Resource inventory</h2></div><button class="inventory-clear" type="button">Clear inventory</button></header><p>Enter what is currently in your bank. Every grind calculator below uses these same quantities.</p><div class="inventory-groups">${Object.entries(
+    inventoryGroups,
+  )
+    .map(
+      ([group, resources]) => `<fieldset><legend>${group}</legend>${resources
+        .map(
+          (resource) => `<label><span>${resource.label}</span><input type="number" min="0" step="1" inputmode="numeric" data-resource="${resource.id}" value="${Math.max(0, Number(state.inventory[resource.id]) || 0)}"></label>`,
+        )
+        .join("")}</fieldset>`,
+    )
+    .join("")}</div><small>Stock is shared between methods. A calculator shows what the bank can cover, but does not reserve or consume items for another skill.</small></section>`;
+  tracker.innerHTML = `<div class="grind-summary"><strong>Resource estimates to level 99</strong><p>Enter your current level or exact total XP and choose a method. Estimates exclude bonus XP, failed cooks and method-specific boosts.</p></div>${inventoryMarkup}${grindSkills
     .map((g, i) => {
       const s = state.grinds[g.skill] || {},
         level = s.level || 1,
@@ -541,10 +688,15 @@ function renderGrinds() {
         effective = method[1] * (withUrn ? 1.2 : 1),
         needed =
           method[2] === "hours" ? remaining / method[1] : remaining / effective,
-        have = s.have || 0,
+        resourceRule = grindResourceRules[`${g.skill}:${method[0]}`],
+        bankCoverage = getBankCoverage(resourceRule),
         urns = withUrn ? Math.ceil(remaining / (g.urn.base * 1.2)) : 0,
         urnHave = s.urnHave || 0;
-      return `<section class="grind-card" data-skill="${g.skill}"><header><div><span>${g.type}</span><h3>${g.skill} 99</h3></div><strong>${fmt(remaining)} XP left</strong></header><div class="grind-fields"><label>Current level<input class="grind-level" type="number" min="1" max="99" value="${level}"></label><label>Total XP<input class="grind-xp" type="number" min="0" max="13034431" value="${xp}"></label><label>Training method<select class="grind-method">${g.methods.map((m, mi) => `<option value="${mi}" ${mi === methodIndex ? "selected" : ""}>${m[0]}</option>`).join("")}</select></label></div><div class="resource-result"><div><span>Still required</span><strong>${fmt(Math.max(0, needed - have))} ${method[2]}</strong><small>${fmt(needed)} total at ${method[1].toLocaleString("en-GB")} XP each${withUrn ? " + 20% urn XP" : ""}</small></div><label>Already gathered<input class="grind-have" type="number" min="0" value="${have}"><span>/ ${fmt(needed)}</span></label></div><div class="location-tip"><span>Best location</span><strong>${method[3]}</strong><p>${method[4]}</p></div>${g.urn ? `<div class="urn-row"><label><input class="grind-urn" type="checkbox" ${withUrn ? "checked" : ""} ${urnBlocked ? "disabled" : ""}> Use ${g.urn.name}s</label><span>${withUrn ? `${fmt(Math.max(0, urns - urnHave))} still needed · ${fmt(Math.max(0, urns - urnHave) * 2)} soft clay · ${fmt(Math.max(0, urns - urnHave))} ${g.urn.rune}s` : "Urns unavailable for this method"}</span>${withUrn ? `<label class="urn-progress">Prepared <input class="grind-urn-have" type="number" min="0" value="${urnHave}"> / ${fmt(urns)}</label>` : ""}</div>` : ""}<a href="https://runescape.wiki/w/Free-to-play_${g.skill}_training" target="_blank" rel="noreferrer">Open training guide ↗</a></section>`;
+      const bankDetail = getBankDetail(resourceRule, bankCoverage);
+      const stillRequired = resourceRule?.inputs
+        ? Math.max(0, needed - bankCoverage)
+        : needed;
+      return `<section class="grind-card" data-skill="${g.skill}"><header><div><span>${g.type}</span><h3>${g.skill} 99</h3></div><strong>${fmt(remaining)} XP left</strong></header><div class="grind-fields"><label>Current level<input class="grind-level" type="number" min="1" max="99" value="${level}"></label><label>Total XP<input class="grind-xp" type="number" min="0" max="13034431" value="${xp}"></label><label>Training method<select class="grind-method">${g.methods.map((m, mi) => `<option value="${mi}" ${mi === methodIndex ? "selected" : ""}>${m[0]}</option>`).join("")}</select></label></div><div class="resource-result"><div><span>Still required</span><strong>${fmt(stillRequired)} ${method[2]}</strong><small>${fmt(needed)} total at ${method[1].toLocaleString("en-GB")} XP each${withUrn ? " + 20% urn XP" : ""}</small></div>${bankDetail}</div><div class="location-tip"><span>Best location</span><strong>${method[3]}</strong><p>${method[4]}</p></div>${g.urn ? `<div class="urn-row"><label><input class="grind-urn" type="checkbox" ${withUrn ? "checked" : ""} ${urnBlocked ? "disabled" : ""}> Use ${g.urn.name}s</label><span>${withUrn ? `${fmt(Math.max(0, urns - urnHave))} still needed · ${fmt(Math.max(0, urns - urnHave) * 2)} soft clay · ${fmt(Math.max(0, urns - urnHave))} ${g.urn.rune}s` : "Urns unavailable for this method"}</span>${withUrn ? `<label class="urn-progress">Prepared <input class="grind-urn-have" type="number" min="0" value="${urnHave}"> / ${fmt(urns)}</label>` : ""}</div>` : ""}<a href="https://runescape.wiki/w/Free-to-play_${g.skill}_training" target="_blank" rel="noreferrer">Open training guide ↗</a></section>`;
     })
     .join(
       "",
@@ -571,8 +723,6 @@ function renderGrinds() {
       update("xp", Math.max(0, Math.min(13034431, +e.target.value || 0)));
     card.querySelector(".grind-method").onchange = (e) =>
       update("method", +e.target.value);
-    card.querySelector(".grind-have").onchange = (e) =>
-      update("have", Math.max(0, +e.target.value || 0));
     const urn = card.querySelector(".grind-urn");
     if (urn) urn.onchange = (e) => update("urn", e.target.checked);
     const urnHave = card.querySelector(".grind-urn-have");
@@ -580,6 +730,22 @@ function renderGrinds() {
       urnHave.onchange = (e) =>
         update("urnHave", Math.max(0, +e.target.value || 0));
   });
+  tracker.querySelectorAll("[data-resource]").forEach((input) => {
+    input.onchange = (event) => {
+      state.inventory[event.target.dataset.resource] = Math.max(
+        0,
+        Math.floor(+event.target.value || 0),
+      );
+      save();
+      renderGrinds();
+    };
+  });
+  tracker.querySelector(".inventory-clear").onclick = () => {
+    if (!confirm("Clear every item in your resource inventory?")) return;
+    state.inventory = {};
+    save();
+    renderGrinds();
+  };
 }
 
 function enableDrag() {
@@ -619,7 +785,7 @@ document.querySelectorAll(".view-tab").forEach(
         route: [
           "YOUR ROUTE",
           "Recommended path",
-          "Drag milestones into your preferred order. Changes are saved automatically on this device.",
+          "Follow your smart next step or open the full checklist to customise the route.",
         ],
         library: [
           "COMPLETE LIBRARY",

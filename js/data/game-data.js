@@ -200,8 +200,8 @@ const skillMethods = {
     "Decide your log split before long sessions so Firemaking does not starve Fletching.",
   ],
   Woodcutting: [
-    "Progress through normal, oak, willow, maple and yew trees.",
-    "Draynor willows are convenient; Daemonheim resource dungeons and scattered yews support later levels.",
+    "Progress through normal, oak, willow and maple trees, then use acadia or yew trees for later levels.",
+    "Acadia requires 50 Woodcutting and is the highest-level F2P tree whose logs can still be cut into arrow shafts; reserve those logs for Fletching.",
     "Bank logs for Fletching and Firemaking rather than power-dropping valuable Ironman supplies.",
   ],
   Crafting: [
@@ -210,6 +210,7 @@ const skillMethods = {
     "Save cut gems for useful jewellery and urns; gather ingredients in batches to reduce travel.",
   ],
   Fletching: [
+    "At 45 Fletching, acadia logs give 12.5 XP per log when cut into arrow shafts. They are the highest-level F2P logs that support shafts.",
     "Follow the retiered F2P bow path: maple shortbows are tier 40 and acadia shortbows are tier 50. Yew bows are now members-only.",
     "Arrow unlocks now match their metal tier: iron at 10, steel at 20, mithril at 30, adamant at 40 and rune at 50 Fletching.",
     "Crossbows now unlock at 3/13/23/33/43/53 Fletching from bronze through rune; a rune crossbow still requires 50 Smithing for its limbs.",

@@ -1,0 +1,119 @@
+.resource-inventory {
+  grid-column: 1 / -1;
+  padding: 24px 0 28px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.resource-inventory header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.resource-inventory header span,
+.bank-coverage span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.resource-inventory h2 {
+  margin: 3px 0 0;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.resource-inventory > p,
+.resource-inventory > small {
+  color: var(--muted);
+}
+
+.inventory-clear {
+  border: 1px solid rgba(216, 119, 119, 0.45);
+  background: transparent;
+  color: var(--red);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.inventory-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 24px;
+  margin: 22px 0 16px;
+}
+
+.inventory-groups fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.inventory-groups legend {
+  width: 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.inventory-groups label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.inventory-groups input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.bank-coverage {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-width: 190px;
+}
+
+.bank-coverage strong {
+  color: var(--gold);
+}
+
+.bank-coverage small {
+  max-width: 300px;
+  color: var(--muted);
+}
+
+.bank-output strong {
+  color: var(--green2);
+}
+
+@media (max-width: 640px) {
+  .resource-inventory header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .inventory-clear {
+    align-self: stretch;
+  }
+
+  .inventory-groups {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .bank-coverage {
+    min-width: 0;
+  }
+}

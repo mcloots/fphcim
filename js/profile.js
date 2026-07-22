@@ -6,6 +6,10 @@
   ];
   const combatSkills = ["Attack", "Defence", "Strength", "Constitution", "Ranged", "Prayer", "Magic"];
   const normalise = (value) => value.toLowerCase().replaceAll("’", "'").replace(/[^a-z0-9]/g, "");
+  const questRequirements = window.F2P_QUEST_REQUIREMENTS || {};
+  const requirementsByTitle = new Map(
+    Object.entries(questRequirements).map(([title, requirements]) => [normalise(title), requirements]),
+  );
 
   function requirementsFor(item) {
     const requirements = new Map();
@@ -35,6 +39,33 @@
       const quest = data.quests?.find((candidate) => normalise(candidate.title) === normalise(item.title));
       if (quest) {
         if (/completed/i.test(quest.status)) return { status: "complete", label: "Quest complete", detail: "Completed in game" };
+        const requirements = requirementsByTitle.get(normalise(item.title)) || { skills: [], quests: [] };
+        const skillDependencies = requirements.skills.map(({ skill, level }) => ({
+          type: "skill",
+          title: skill,
+          current: data.skills[skill] || 1,
+          required: level,
+          complete: (data.skills[skill] || 1) >= level,
+        }));
+        const questDependencies = requirements.quests.map((title) => {
+          const dependency = data.quests?.find(
+            (candidate) => normalise(candidate.title) === normalise(title),
+          );
+          return {
+            type: "quest",
+            title,
+            complete: Boolean(dependency && /completed/i.test(dependency.status)),
+          };
+        });
+        const dependencies = [...questDependencies, ...skillDependencies];
+        const missingSkills = skillDependencies
+          .filter((dependency) => !dependency.complete)
+          .map((dependency) => ({
+            skill: dependency.title,
+            current: dependency.current,
+            required: dependency.required,
+            remaining: dependency.required - dependency.current,
+          }));
         return quest.eligible
           ? { status: "ready", label: "Ready", detail: "Quest requirements met" }
           : {
@@ -42,6 +73,8 @@
               label: "Not ready",
               detail: "One or more quest or skill requirements are still missing.",
               questLocked: true,
+              dependencies,
+              missing: missingSkills,
             };
       }
     }
